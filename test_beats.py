@@ -21,6 +21,7 @@ def main() -> None:
         chp1_level1: Track = Chp1.levels[0]
         sim_array: np.ndarray = SoundEngine.get_nparray_from_track(chp1_level1)
         print(f"Generated audio array with shape {sim_array.shape}.")
+        print(sim_array)
         SoundEngine.play_sound_from_npdarray(sim_array)
 
         clock = pygame.time.Clock()

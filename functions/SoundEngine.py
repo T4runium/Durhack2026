@@ -5,7 +5,6 @@ from ..sounds.sound_effect_dict import sound_effects
 
 SCALE_FACTOR = 20.0  # Adjust this factor to scale the velocity to [0.0, 1.0]
 
-
 def get_strength_from_velocity(velocity: float) -> Strength:
     """Get the strength category based on the velocity value."""
     return min(Strength, key=lambda strength: abs(strength.value - velocity))
@@ -97,3 +96,12 @@ def play_sound_from_npdarray(audio_array: np.ndarray) -> None:
 
     sound = pygame.sndarray.make_sound(audio_array)
     sound.play()
+    
+def clip_audio_arrays(arrays: list[np.ndarray], max_time: float):
+    mixer_settings = pygame.mixer.get_init()
+    if mixer_settings is None:
+        raise RuntimeError("The Pygame mixer must be initialized before clipping audio arrays.")
+    
+    sample_rate, _, _ = mixer_settings
+    max_samples = int(max_time * sample_rate)
+    return [array[:max_samples] for array in arrays]
