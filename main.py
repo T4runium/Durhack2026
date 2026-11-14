@@ -15,9 +15,9 @@ def main() -> None:
     pygame.display.set_caption("Durhack2026")
     clock: pygame.time.Clock = pygame.time.Clock()
     drums = pygame.sprite.Group(
-    Drumkit(space, (400, 300)),
-    Drumkit(space, (600, 300)),
-    Drumkit(space, (200, 300)),
+    Cymbal(space, (400, 300)),
+    Snare(space, (600, 300)),
+    Bass(space, (200, 300)),
 )
 
     running = True
