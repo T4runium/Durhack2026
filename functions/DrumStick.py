@@ -78,7 +78,7 @@ class DrumStickDisplay(pygame.sprite.Sprite):
         mouse_pos = pygame.mouse.get_pos()
         
         if ( pygame.mouse.get_pos()[1] > 300):
-            self.image.set_alpha(50)
+            self.image.set_alpha( int(85 - (pygame.mouse.get_pos()[1] - 300) / 4) )
         else:
             self.image.set_alpha(100)
         
