@@ -21,7 +21,7 @@ metronome_sound: pygame.mixer.Sound = pygame.mixer.Sound(
     "./sounds/metronome/freesoundMetronome.mp3"
 )
 
-SCALE_FACTOR = 20.0  # Adjust this factor to scale the velocity to [0.0, 1.0]
+SCALE_FACTOR: int = 1700 # Adjust this factor to scale the velocity to [0.0, 1.0]
 
 def get_strength_from_velocity(velocity: float) -> Strength:
     """Get the strength category based on the velocity value."""
