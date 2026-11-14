@@ -89,6 +89,7 @@ def main() -> None:
             if event.type == pygame.QUIT:
 
                 running = False
+
             elif event.type == pygame.VIDEORESIZE:
                 # pygame 2 resizes the window surface itself; calling set_mode here
                 # fights tiling compositors like niri and loops forever
