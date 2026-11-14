@@ -21,8 +21,9 @@ metronome_sound: pygame.mixer.Sound = pygame.mixer.Sound(
     "./sounds/metronome/freesoundMetronome.mp3"
 )
 
-SCALE_FACTOR: int = 1700 # Adjust this factor to scale the velocity to [0.0, 1.0]
+SCALE_FACTOR: int = 1700 # Adjust this factor to scale the impulse to [0.0, 1.0]
 VOLUME_FLOOR: float = 0.15 # Minimum volume level
+IMPULSE_REJECTION_THRESHOLD: float = 40 # Impulses below this value are ignored
 
 def get_strength_from_impulse(impulse: float) -> Strength:
     """Get the strength category based on the impulse value."""
@@ -30,6 +31,9 @@ def get_strength_from_impulse(impulse: float) -> Strength:
 
 def play_sound_from_params(type: str, instrument: int,
     impulse: float = 0.0) -> None:
+    if impulse < IMPULSE_REJECTION_THRESHOLD:
+        print(f"Ignored impulse {impulse} for {type} instrument {instrument} (below threshold).")
+        return
     impulse = max(0.0, min(1.0, impulse))  # Clamp impulse to [0.0, 1.0]
     if type not in sound_effects:
         return
