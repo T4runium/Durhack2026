@@ -113,7 +113,7 @@ def main() -> None:
         drumstick.draw(screen)
 
         draw_options = pymunk.pygame_util.DrawOptions(screen)
-        space.debug_draw(draw_options)
+        # space.debug_draw(draw_options)
 
         pygame.display.flip()
 

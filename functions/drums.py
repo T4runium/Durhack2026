@@ -9,6 +9,7 @@ class Drumkit(pygame.sprite.Sprite):
         self.pos = pos
         self.shape_size = shape_size  # Default size for the drumkit shape
         self.clicked = False
+        self.allow_move = True
         self.space.collision_type = collision_type  # Default collision type, can be overridden in subclasses
         self.create_drum()
         
@@ -22,18 +23,20 @@ class Drumkit(pygame.sprite.Sprite):
 
     def mouse_input(self):
         mouse_pos = pygame.mouse.get_pos()
-        if self.rect.collidepoint(mouse_pos) and pygame.mouse.get_pressed()[0]:
+        if self.rect.collidepoint(mouse_pos) and pygame.mouse.get_pressed()[0] and self.allow_move:
             self.clicked = True
         
-        if self.clicked:
+        if self.clicked and self.allow_move:
             self.mouse_move(mouse_pos)
 
     def mouse_move(self, mouse_pos):
+        print(self.clicked)
         if self.clicked:
             if not self.rect.collidepoint(mouse_pos) and pygame.mouse.get_pressed()[0]:
                 self.body.position = mouse_pos
                 self.space.reindex_shapes_for_body(self.body)
                 self.clicked = False
+                self.allow_move = False
 
     def update(self):
         # Update the drumkit's position based on physics simulation
