@@ -1,7 +1,21 @@
+import os
+import sys
+from pathlib import Path
+
 import pygame
 import numpy as np
-from Durhack2026.types.soundTypes import SoundEvent, Strength, Track
-from Durhack2026.sounds.sound_effect_dict import sound_effects
+
+try:
+    from ..types.soundTypes import SoundEvent, Strength, Track
+    from ..sounds.sound_effect_dict import sound_effects
+except ImportError:
+    project_root = Path(__file__).resolve().parents[1]
+    sys.path.insert(0, str(project_root.parent))
+    os.chdir(project_root)
+    pygame.init()
+    pygame.mixer.init()
+    from Durhack2026.types.soundTypes import SoundEvent, Strength, Track
+    from Durhack2026.sounds.sound_effect_dict import sound_effects
 
 metronome_sound: pygame.mixer.Sound = pygame.mixer.Sound(
     "./sounds/metronome/freesoundMetronome.mp3"
