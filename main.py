@@ -3,11 +3,13 @@ from functions.drums import create_drums
 from functions.CollisionHandler import register_collision_handlers
 from functions.DrumStick import CreateDrumStick
 
+import pymunk.pygame_util
+
 SCREEN_SIZE = (800, 600)
 FPS = 60
 
 space = pymunk.Space()
-space.gravity = (0, 500) # 500 pixels per second squared downward
+space.gravity = (0, 750) # 500 pixels per second squared downward
 
 
 def main() -> None:
@@ -47,10 +49,17 @@ def main() -> None:
         drumstick.update()
         drumstick.draw(screen)
 
+        draw_options = pymunk.pygame_util.DrawOptions(screen)
+        space.debug_draw(draw_options)
+
         pygame.display.flip()
 
         clock.tick(FPS)
-        space.step(1 / FPS) # update physics simulation
+
+        sub_steps = 10
+
+        for i in range(sub_steps):
+            space.step(1 / FPS / sub_steps) # update physics simulation
 
     pygame.quit()
 
