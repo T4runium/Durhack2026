@@ -36,7 +36,7 @@ def main() -> None:
 
         draw_ball(screen, ball)
 
-        
+
         pygame.display.flip()
 
         clock.tick(FPS)
