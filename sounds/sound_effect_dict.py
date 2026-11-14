@@ -1,6 +1,6 @@
 import pygame
 
-from ..types.soundTypes import Strength
+from ..dhtypes.soundTypes import Strength
 
 sound_effects: dict[str, dict[int, dict[Strength, pygame.mixer.Sound] | None]] = {
     "drums1": {
