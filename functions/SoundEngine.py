@@ -22,7 +22,7 @@ metronome_sound: pygame.mixer.Sound = pygame.mixer.Sound(
     "./sounds/metronome/freesoundMetronome.mp3"
 )
 
-SCALE_FACTOR: int = 2000 # Adjust this factor to scale the impulse to [0.0, 1.0]
+SCALE_FACTOR: int = 1000 # Adjust this factor to scale the impulse to [0.0, 1.0]
 VOLUME_FLOOR: float = 0.15 # Minimum volume level
 IMPULSE_REJECTION_THRESHOLD: float = 40 # Impulses below this value are ignored
 
