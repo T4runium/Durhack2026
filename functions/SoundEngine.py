@@ -7,7 +7,7 @@ import pygame
 import numpy as np
 
 try:
-    from ..types.soundTypes import SoundEvent, Strength, Track
+    from ..dhtypes.soundTypes import SoundEvent, Strength, Track
     from ..sounds.sound_effect_dict import sound_effects
 except ImportError:
     project_root = Path(__file__).resolve().parents[1]
@@ -15,7 +15,7 @@ except ImportError:
     os.chdir(project_root)
     pygame.init()
     pygame.mixer.init()
-    from Durhack2026.types.soundTypes import SoundEvent, Strength, Track
+    from Durhack2026.dhtypes.soundTypes import SoundEvent, Strength, Track
     from Durhack2026.sounds.sound_effect_dict import sound_effects
 
 metronome_sound: pygame.mixer.Sound = pygame.mixer.Sound(

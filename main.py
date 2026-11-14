@@ -5,7 +5,7 @@ from functions.DrumStick import CreateDrumStick
 from functions.neural import neural
 import pymunk.pygame_util
 
-from .types import gameStates
+from dhtypes import gameStates
 
 SCREEN_SIZE = (800, 600)
 FPS = 60

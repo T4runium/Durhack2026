@@ -1,4 +1,4 @@
-from ..types.soundTypes import Strength, SoundEvent, Track
+from ..dhtypes.soundTypes import Strength, SoundEvent, Track
 
 #Each track consists of a name, bpm, and a list of sound events timestamped with the beat they occur on. 
 levels: list[Track] = [
