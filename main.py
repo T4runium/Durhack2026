@@ -5,9 +5,23 @@ from functions.DrumStick import CreateDrumStick
 from functions.neural import neural
 import pymunk.pygame_util
 
+<<<<<<< HEAD
+<<<<<<< HEAD
+<<<<<<< HEAD
+=======
+SCREEN_SIZE = (1280, 720)
+>>>>>>> 56f6eb25805fbf359e72771e8d934f6a9ac7ced0
+=======
+from dhtypes import gameStates
+
+>>>>>>> 94f0eb5c220b4f1e0cc6d78c119418d8ab83ee86
+SCREEN_SIZE = (800, 600)
+>>>>>>> 94f0eb5c220b4f1e0cc6d78c119418d8ab83ee86
+=======
 SCREEN_SIZE = (1280, 720)
 from dhtypes import gameStates
 
+>>>>>>> 3363fe4a3676b6ff6551e037d42612a13e00c06c
 FPS = 60
 
 space = pymunk.Space()
@@ -60,14 +74,13 @@ class Bandmate:
             self.answer_start = now
         if self.answer_start is not None:
             while self.queue and self.queue[0][0] * SPB <= now - self.answer_start:
-                _, ev = self.queue.pop(0)
+                _, ev = self.queue.pop(0)t p
                 SoundEngine.play_sound_from_params(ev.type, ev.instrument, ev.velocity)
             if now - self.answer_start >= ROUND_BEATS * SPB:   # answer finished: next round
                 self.player_hits.clear()
                 self.queue.clear()
                 self.round_start, self.answer_start = now, None
 
-gameState: gameStates.GameState = gameStates.GameState.LOADING
 
 def main() -> None:
     """Run the main Pygame application loop."""
@@ -85,7 +98,6 @@ def main() -> None:
         space.on_collision(1, collision_type, post_solve=bandmate.on_hit)
 
     running = True
-    gameState: gameStates.GameState = gameStates.GameState.DRUMMOVE # Start in DRUMMOVE state for testing
     while running:
 
         for event in pygame.event.get():
@@ -122,14 +134,6 @@ def main() -> None:
 
         for i in range(sub_steps):
             space.step(1 / FPS / sub_steps) # update physics simulation
-            
-        match gameState:
-            case gameStates.GameState.DRUMMOVE:
-                pass
-            case gameStates.GameState.STICKDROP:
-                pass
-            case _:
-                pass
 
     pygame.quit()
 
