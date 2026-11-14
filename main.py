@@ -7,6 +7,7 @@ import pymunk.pygame_util
 
 <<<<<<< HEAD
 <<<<<<< HEAD
+<<<<<<< HEAD
 =======
 SCREEN_SIZE = (1280, 720)
 >>>>>>> 56f6eb25805fbf359e72771e8d934f6a9ac7ced0
@@ -16,6 +17,11 @@ from dhtypes import gameStates
 >>>>>>> 94f0eb5c220b4f1e0cc6d78c119418d8ab83ee86
 SCREEN_SIZE = (800, 600)
 >>>>>>> 94f0eb5c220b4f1e0cc6d78c119418d8ab83ee86
+=======
+SCREEN_SIZE = (1280, 720)
+from dhtypes import gameStates
+
+>>>>>>> 3363fe4a3676b6ff6551e037d42612a13e00c06c
 FPS = 60
 
 space = pymunk.Space()
