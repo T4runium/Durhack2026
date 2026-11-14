@@ -55,8 +55,8 @@ class DrumStick(pygame.sprite.Sprite):
 
         self.rect.center = round(self.shape.body.position.x), round(self.shape.body.position.y)
         
-        self.image = pygame.transform.rotate(self.originalimage , self.shape.body.angle )
-        self.rect = self.originalimage.get_rect(center = self.rect.center)
+        self.image = pygame.transform.rotate(self.originalimage ,-math.degrees(self.shape.body.angle) )
+        self.rect = self.image.get_rect(center = self.rect.center)
 
 
 def CreateDrumStick(Space : pymunk.Space):
