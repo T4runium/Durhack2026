@@ -1,48 +1,7 @@
 import pymunk
 import pygame
-"""
-SizeOfDrumStick : tuple = (20,5)
-BorderSize : tuple = (300,400)
 
-
-def Create_DrumStick(Space : pymunk.Space , Coordinates : tuple):
-    global SizeOfDrumStick
-    
-    Body = pymunk.Body(1,100)
-    Body.position = (100,300)
-
-
-    Shape = pymunk.Poly.create_box(Body , SizeOfDrumStick )
-
-
-    Space.add(Body , Shape)
-    return Shape
-
-
-def CreateSegments(Space : pymunk.Space , Point1 : tuple , Point2 : tuple):
-    Segment = pymunk.Segment(Space.static_body , Point1 , Point2 )
-
-
-
-class DrumStick:
-
-    Shape : pymunk.Shape
-
-    def __init__(self , Space : pymunk.Shape , Coordinates : tuple):
-        self.Shape = Create_DrumStick(Space , Coordinates)
-
-    def Show_DrumStick(self, Window : pygame.surface):
-        global SizeOfDrumStick
-        
-        ShapeToWindow = pygame.Rect(int(self.Shape.body.position.x) , int(self.Shape.body.position.y) , SizeOfDrumStick[0] , SizeOfDrumStick[1])
-
-        ShapeToWindow.center = (int(SizeOfDrumStick[0] / 2) , int(SizeOfDrumStick[1] / 2))
-
-        pygame.draw.rect(Window , (255,255,255) , ShapeToWindow )
-
-    def RemoveDrumStick(self , Space : pymunk.Space):
-        Space.remove(self.Body,self.Shape)
-"""
+import math
 
 DrumStick_size = (10,10)
 
@@ -54,8 +13,11 @@ def Create_DrumStick(Space : pymunk.Space):
     body.position = (400,0)
 
     shape = pymunk.Poly.create_box(body , DrumStick_size )
-    shape.elasticity = 1
+    shape.elasticity = 0.75
     Space.add(body , shape)
+
+    body.torque = 1
+
     return shape
 
 
@@ -64,6 +26,7 @@ def Create_DrumStick(Space : pymunk.Space):
 
 class DrumStick(pygame.sprite.Sprite):
     shape : pymunk.Shape
+    
     space : pymunk.Space
     
     def __init__(self , space : pymunk.Space):
@@ -75,14 +38,21 @@ class DrumStick(pygame.sprite.Sprite):
         
         self.shape = Create_DrumStick(space)
         self.space = space
+        
         self.image = pygame.image.load("graphics/bass.png").convert_alpha()
+        self.originalimage = self.image
+        
         self.rect = self.image.get_rect(center=((DrumStick_size)))
         self.shape.collision_type = 1
 
+
     def update(self):
         # Update the drumkit's position based on physics simulation
-        self.rect.center = round(self.shape.body.position.x), round(self.shape.body.position.y)
 
+        self.rect.center = round(self.shape.body.position.x), round(self.shape.body.position.y)
+        
+        self.image = pygame.transform.rotate(self.originalimage , self.shape.body.angle )
+        self.rect = self.originalimage.get_rect(center = self.rect.center)
         
 
 
