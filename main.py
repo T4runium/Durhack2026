@@ -41,6 +41,7 @@ def main() -> None:
         drums.draw(screen)
 
 
+
         pygame.display.flip()
 
         clock.tick(FPS)
