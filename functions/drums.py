@@ -34,7 +34,7 @@ class Cymbal(Drumkit):
         super().__init__(space, pos)
         self.image = pygame.image.load("graphics/cymbal.png").convert_alpha()
         self.rect = self.image.get_rect(center=(pos))
-        self.shape_size = (100, 100)
+        self.shape_size = (223, 33)
         self.shape.collision_type = 2
 
 class Snare(Drumkit):
@@ -50,7 +50,7 @@ class Bass(Drumkit):
         super().__init__(space, pos)
         self.image = pygame.image.load("graphics/bass.png").convert_alpha()
         self.rect = self.image.get_rect(center=(pos))
-        self.shape_size = (100, 100)
+        self.shape_size = (202, 112)
         self.shape.collision_type = 4
 
 class Kick(Drumkit):
@@ -58,7 +58,7 @@ class Kick(Drumkit):
         super().__init__(space, pos)
         self.image = pygame.image.load("graphics/kick.png").convert_alpha()
         self.rect = self.image.get_rect(center=(pos))
-        self.shape_size = (100, 100)
+        self.shape_size = (204, 70)
         self.shape.collision_type = 5
 
 def create_drums(space: pymunk.Space) -> pygame.sprite.Group:

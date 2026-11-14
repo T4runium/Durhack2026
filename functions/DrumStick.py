@@ -3,7 +3,7 @@ import pygame
 
 import math
 
-DrumStick_size = (125,50)
+DrumStick_size = (182,12)
 
 def Create_DrumStick(Space : pymunk.Space):
     global DrumStick_size

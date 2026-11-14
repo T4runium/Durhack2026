@@ -14,7 +14,7 @@ pygame.mixer.init()
 
 import Durhack2026.functions.SoundEngine as SoundEngine
 
-from Durhack2026.types.soundTypes import Track
+from Durhack2026.dhtypes.soundTypes import Track
 
 def main() -> None:
     
