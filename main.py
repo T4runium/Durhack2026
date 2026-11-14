@@ -73,12 +73,19 @@ class Bandmate:
 gameState: gameStates.GameState = gameStates.GameState.STICKMOVE
 
 
+background = pygame.image.load('graphics/backgrounds/BG1.png')
+background = pygame.transform.scale(background , SCREEN_SIZE)
+
+
+
 def main() -> None:
     """Run the main Pygame application loop."""
     pygame.init()
     screen: pygame.Surface = pygame.display.set_mode(SCREEN_SIZE, pygame.RESIZABLE)
     pygame.display.set_caption("Durhack2026")
     clock: pygame.time.Clock = pygame.time.Clock()
+
+
 
     # Create instances here
     drums = create_drums(space)
@@ -110,7 +117,7 @@ def main() -> None:
 
         bandmate.update()
 
-        screen.fill((0, 0, 0)) # replace with ui image when ready
+        screen.blit(background , (0,0)) # replace with ui image when ready
 
         # drawing goes here
 
