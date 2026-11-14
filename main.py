@@ -1,12 +1,15 @@
 import pygame, pymunk
 from functions.drums import Drumkit, create_drums
 from functions.CollisionHandler import on_hit as game_on_hit
-from functions.DrumStick import CreateDrumStick
+from functions.DrumStick import CreateDrumStick , Create_TransparentSource
 from functions.neural import neural
 import pymunk.pygame_util
 
 SCREEN_SIZE = (1280, 720)
 from dhtypes import gameStates
+
+def IsValidPosition():
+    return pygame.mouse.get_pos()[1] < 300
 
 FPS = 60
 
@@ -67,7 +70,13 @@ class Bandmate:
                 self.queue.clear()
                 self.round_start, self.answer_start = now, None
 
-gameState: gameStates.GameState = gameStates.GameState.LOADING
+gameState: gameStates.GameState = gameStates.GameState.STICKMOVE
+
+
+background = pygame.image.load('graphics/backgrounds/BG1.png')
+background = pygame.transform.scale(background , SCREEN_SIZE)
+
+
 
 def main() -> None:
     """Run the main Pygame application loop."""
@@ -76,19 +85,25 @@ def main() -> None:
     pygame.display.set_caption("Durhack2026")
     clock: pygame.time.Clock = pygame.time.Clock()
 
+
+
     # Create instances here
     drums = create_drums(space)
-    drumstick = CreateDrumStick(space)
+    drumstick : pygame.sprite.Group = Create_TransparentSource()
+
     bandmate = Bandmate()
+
 
     for collision_type in range(2, 6):
         space.on_collision(1, collision_type, post_solve=bandmate.on_hit)
         
-    gameState = gameStates.GameState.MENU
+    gameState = gameStates.GameState.STICKMOVE
 
     active_drum: Drumkit | None = None
     running = True
     while running:
+
+        has_pressed = False
 
         for event in pygame.event.get():
 
@@ -134,7 +149,7 @@ def main() -> None:
 
         bandmate.update()
 
-        screen.fill((0, 0, 0)) # replace with ui image when ready
+        screen.blit(background , (0,0)) # replace with ui image when ready
 
         # drawing goes here
 
@@ -162,7 +177,16 @@ def main() -> None:
             case gameStates.GameState.MENU:
                 pass
             case gameStates.GameState.STICKDROP:
+                # end case, either time limit or jump limit
                 pass
+            case gameStates.GameState.STICKMOVE:
+
+                if (pygame.mouse.get_pressed()[0] and IsValidPosition() ):
+                    drumstick.empty()
+
+                    drumstick = CreateDrumStick(space)
+                    gameState = gameStates.GameState.STICKDROP
+                
             
 
     pygame.quit()
@@ -170,3 +194,5 @@ def main() -> None:
 
 if __name__ == "__main__":
     main()
+
+
