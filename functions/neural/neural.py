@@ -339,20 +339,12 @@ def test(net=None):
     return net
 
 
-# =====================================================================================
-# Imitator: an AI "hand" plays the actual game (pymunk drumstick) to copy a track.
-#
-# The game has one drumstick that falls and bounces on the drums. Each time the stick hits a
-# drum (or a planned hit is overdue), the hand sets the stick's velocity with projectile maths
-# so it lands on the next note's drum at the right moment. No network here: a learned aim was
-# tried and lost to the formula (flight is pure gravity, which the formula solves exactly).
-# Pair it with the bandmate: the network composes or answers, the imitator plays it in the game.
-# =====================================================================================
+
 import pymunk
 from DrumStick import Create_DrumStick
 
 FPS = 60                     # main.py: clock.tick(FPS), space.step(1 / FPS)
-GRAVITY = 900                # main.py: space.gravity = (0, 900)
+GRAVITY = 750     # main.py: space.gravity = (0, 750)
 # Copy of drums.create_drums: collision type -> centre. Update if the drums move.
 DRUM_LAYOUT = {2: (600, 600), 3: (400, 600), 4: (200, 600)}
 DRUM_SIZE = 100
@@ -561,7 +553,7 @@ def play_in_game(track):
         stick_group.draw(screen)
         pygame.display.flip()
         clock.tick(FPS)
-        space.step(1 / FPS)
+        space.step(10 / FPS)
         frame += 1
     pygame.quit()
     result = score(notes, ctrl.hits)
@@ -614,3 +606,5 @@ if __name__ == "__main__":
         SoundEngine.play_sound_from_track(track)
     else:
         test(train())
+
+test(train())
