@@ -44,23 +44,50 @@ class DrumStick:
         Space.remove(self.Body,self.Shape)
 """
 
-def Create_DrumStick(Space : pymunk.Space):
-    body = pymunk.Body(1, 10, body_type= pymunk.Body.DYNAMIC )
-    body.position = (400,600)
+DrumStick_size = (10,10)
 
-    shape = pymunk.Poly.create_box(body , (100 , 100) )
+def Create_DrumStick(Space : pymunk.Space):
+    global DrumStick_size
+
+    body = pymunk.Body(1, 1, body_type= pymunk.Body.DYNAMIC )
+    
+    body.position = (400,100)
+
+    shape = pymunk.Poly.create_box(body , DrumStick_size )
+    shape.elasticity = 1
     Space.add(body , shape)
     return shape
 
 
-def UpdateDrumStick(Space : pymunk.Space ):
-    pass
 
+
+
+class DrumStick(pygame.sprite.Sprite):
+    shape : pymunk.Shape
+    space : pymunk.Space
     
+    def __init__(self , space : pymunk.Space):
+        # Create the Physics to it
+
+        global DrumStick_size
+
+        super().__init__()
+        
+        self.shape = Create_DrumStick(space)
+        self.space = space
+
+        self.image = pygame.image.load("graphics/bass.png").convert_alpha()
+        self.rect = self.image.get_rect(center=((DrumStick_size)))
+
+    def update(self):
+        # Update the drumkit's position based on physics simulation
+        self.rect.center = round(self.shape.body.position.x), round(self.shape.body.position.y)
+
+        
 
 
-
-
+def CreateDrumStick(Space : pymunk.Space):
+    return pygame.sprite.Group( DrumStick(Space) )
     
 
 
