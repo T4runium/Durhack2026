@@ -47,3 +47,10 @@ class Bass(Drumkit):
     #         if drum.shape.point_query(ball.position).distance < 0:
     #             return True
     #     return False
+
+def create_drums(space: pymunk.Space) -> pygame.sprite.Group:
+    return pygame.sprite.Group(
+        Cymbal(space, (400, 300)),
+        Snare(space, (600, 300)),
+        Bass(space, (200, 300)),
+    )

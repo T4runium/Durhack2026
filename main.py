@@ -1,5 +1,5 @@
 import pygame, pymunk
-from functions.drums import Drumkit
+from functions.drums import create_drums
 
 SCREEN_SIZE = (800, 600)
 FPS = 60
@@ -14,11 +14,8 @@ def main() -> None:
     screen: pygame.Surface = pygame.display.set_mode(SCREEN_SIZE, pygame.RESIZABLE)
     pygame.display.set_caption("Durhack2026")
     clock: pygame.time.Clock = pygame.time.Clock()
-    drums = pygame.sprite.Group(
-    Cymbal(space, (400, 300)),
-    Snare(space, (600, 300)),
-    Bass(space, (200, 300)),
-)
+
+    drums = create_drums(space)
 
     running = True
     while running:
