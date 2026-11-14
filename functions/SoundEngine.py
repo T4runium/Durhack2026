@@ -38,6 +38,7 @@ def get_strength_from_velocity(velocity: float) -> Strength:
 
 def play_sound_from_params(type: str, instrument: int,
     velocity: float = 0.0) -> None:
+    velocity = max(0.0, min(1.0, velocity / 20))  # Clamp velocity to [0.0, 1.0]
     if type not in sound_effects:
         return
     else:
@@ -49,5 +50,6 @@ def play_sound_from_params(type: str, instrument: int,
             key=lambda available_strength: abs(available_strength.value - velocity),
         )
         sound: pygame.mixer.Sound = instrument_sound_array[closest_strength]
+        sound.set_volume(0.5 + (velocity * 0.5))
         sound.play()
         
