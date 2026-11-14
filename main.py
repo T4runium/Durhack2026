@@ -5,13 +5,9 @@ from functions.DrumStick import CreateDrumStick
 from functions.neural import neural
 import pymunk.pygame_util
 
-<<<<<<< HEAD
-SCREEN_SIZE = (1280, 720)
-=======
 from dhtypes import gameStates
 
 SCREEN_SIZE = (800, 600)
->>>>>>> 3df558d7b6c92c2f211cb07f1465a95968309817
 FPS = 60
 
 space = pymunk.Space()
