@@ -194,11 +194,14 @@ def generate_random_track(bpm: int, track_length_beats: int):
     instruments = {stype: list(sound_effects[stype].keys()) for stype in sound_types}
     sound_events: list[tuple[float, SoundEvent]] = []
 
-    for beat in range(track_length_beats):
+    for beat in range(track_length_beats * 4): # generate quarter beats
         if np.random.rand() < 0.5:
             stype = np.random.choice(sound_types)
             instrument = np.random.choice(instruments[stype])
             velocity = np.random.uniform(0.0, SCALE_FACTOR)
             sound_events.append((float(beat), SoundEvent(stype, instrument, velocity)))
+            
+    #scale beat to quarter beats
+    sound_events = [(beat / 4.0, event) for beat, event in sound_events]
 
     return Track(name="Random Track", bpm=bpm, sound_events=sound_events)
