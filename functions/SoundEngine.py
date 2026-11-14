@@ -3,6 +3,10 @@ import numpy as np
 from ..types.soundTypes import Strength, Track
 from ..sounds.sound_effect_dict import sound_effects
 
+metronome_sound: pygame.mixer.Sound = pygame.mixer.Sound(
+    "./sounds/metronome/freesoundMetronome.mp3"
+)
+
 SCALE_FACTOR = 20.0  # Adjust this factor to scale the velocity to [0.0, 1.0]
 
 def get_strength_from_velocity(velocity: float) -> Strength:
@@ -18,10 +22,57 @@ def play_sound_from_params(type: str, instrument: int,
         instrument_sound_array: dict[Strength, pygame.mixer.Sound] | None = sound_effects[type][instrument]
         if instrument_sound_array is None:
             return
-        sound: pygame.mixer.Sound = instrument_sound_array[get_strength_from_velocity(velocity)]
+        strength = min(
+            instrument_sound_array,
+            key=lambda available_strength: abs(available_strength.value - velocity),
+        )
+        sound: pygame.mixer.Sound = instrument_sound_array[strength]
         sound.set_volume(0.5 + (velocity * 0.5))
         sound.play()
         
+def play_sound_from_track(track: Track, metronome: bool = False) -> None:
+    """Play a track in beat order, optionally playing a click on each beat."""
+    if pygame.mixer.get_init() is None:
+        raise RuntimeError("The Pygame mixer must be initialized before playing sounds.")
+    if track.bpm <= 0:
+        raise ValueError("Track BPM must be greater than zero.")
+
+    seconds_per_beat = 60.0 / track.bpm
+    events = sorted(track.sound_events, key=lambda event: event[0])
+    if any(start_beat < 0 for start_beat, _ in events):
+        raise ValueError("Sound event beat positions must not be negative.")
+
+    start_time = pygame.time.get_ticks() / 1000.0
+    next_event = 0
+    next_metronome_beat = 0
+    last_event_beat = events[-1][0] if events else -1
+    clock = pygame.time.Clock()
+
+    while next_event < len(events):
+        elapsed = pygame.time.get_ticks() / 1000.0 - start_time
+
+        if metronome:
+            while (
+                next_metronome_beat <= last_event_beat
+                and next_metronome_beat * seconds_per_beat <= elapsed
+            ):
+                metronome_sound.play()
+                next_metronome_beat += 1
+
+        while (
+            next_event < len(events)
+            and events[next_event][0] * seconds_per_beat <= elapsed
+        ):
+            _, event = events[next_event]
+            play_sound_from_params(event.type, event.instrument, event.velocity)
+            next_event += 1
+
+        clock.tick(120)
+
+    while pygame.mixer.get_busy():
+        clock.tick(60)
+
+    
 def get_nparray_from_track(
     track: Track
     ) -> np.ndarray:
@@ -29,14 +80,19 @@ def get_nparray_from_track(
     mixer_settings = pygame.mixer.get_init()
     if mixer_settings is None:
         raise RuntimeError("The Pygame mixer must be initialized before mixing sounds.")
+    if track.bpm <= 0:
+        raise ValueError("Track BPM must be greater than zero.")
 
     sample_rate, _, channels = mixer_settings
     decoded_events: list[tuple[np.ndarray, int, float]] = []
     total_samples = 0
+    seconds_per_beat = 60.0 / track.bpm
 
-    for start_time, event in track.sound_events:
-        if start_time < 0:
-            raise ValueError("Sound event start times must not be negative.")
+    for start_beat, event in track.sound_events:
+        if start_beat < 0:
+            raise ValueError("Sound event beat positions must not be negative.")
+
+        start_time = start_beat * seconds_per_beat
 
         instrument_sounds = sound_effects.get(event.type)
         if instrument_sounds is None:
