@@ -1,5 +1,6 @@
 import pygame, pymunk
 from functions.drums import create_drums
+from functions.CollisionHandler import register_collision_handlers
 from functions.DrumStick import CreateDrumStick
 
 SCREEN_SIZE = (800, 600)
@@ -16,8 +17,12 @@ def main() -> None:
     pygame.display.set_caption("Durhack2026")
     clock: pygame.time.Clock = pygame.time.Clock()
 
+    # Create instances here
     drums = create_drums(space)
     drumstick = CreateDrumStick(space)
+
+
+    register_collision_handlers(space)
 
     running = True
     while running:

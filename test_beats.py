@@ -27,6 +27,11 @@ def main() -> None:
         clock = pygame.time.Clock()
         while pygame.mixer.get_busy():
             clock.tick(60)
+            
+        sim_array2: np.ndarray = SoundEngine.get_nparray_from_track(Chp1.levels[1])
+        print(f"Generated audio array with shape {sim_array2.shape}.")
+        print(sim_array2)
+        print(SoundEngine.check_audio_difference(sim_array, sim_array2))
     finally:
         pygame.mixer.stop()
         pygame.quit()

@@ -20,6 +20,9 @@ sound_effects: dict[str, dict[int, dict[Strength, pygame.mixer.Sound] | None]] =
         5: { #DrumLarge
             Strength.MEDIUM: pygame.mixer.Sound("./sounds/drums1/VHHDrumLarge.wav")
         },
+        6: { #Kick
+            Strength.MEDIUM: pygame.mixer.Sound("./sounds/drums1/VHHKick.wav")
+        },
         7: { #Snare
             Strength.MEDIUM: pygame.mixer.Sound("./sounds/drums1/VHHSnareDrumTap.wav"),
             Strength.HARD: pygame.mixer.Sound("./sounds/drums1/VHHSnare.wav")
