@@ -43,6 +43,7 @@ def play_sound_from_params(type: str, instrument: int,
         sound: pygame.mixer.Sound = instrument_sound_array[strength]
         sound.set_volume(0.5 + (velocity * 0.5))
         sound.play()
+        print(f"Playing sound: {type}, instrument: {instrument}, strength: {strength.name}, normalised velocity: {velocity:.2f}, volume: {sound.get_volume():.2f}")
         
 def play_sound_from_track(track: Track, metronome: bool = False) -> None:
     """Play a track in beat order, optionally playing a click on each beat."""
@@ -219,3 +220,18 @@ def generate_random_track(bpm: int, track_length_beats: int):
     sound_events = [(beat / 4.0, event) for beat, event in sound_events]
 
     return Track(name="Random Track", bpm=bpm, sound_events=sound_events)
+
+def get_two_random_tracks_as_arrays(bpm: int, track_length_beats: int) -> tuple[np.ndarray, np.ndarray]:
+    """Generate two random tracks and return their audio arrays."""
+    track1 = generate_random_track(bpm, track_length_beats)
+    track2 = generate_random_track(bpm, track_length_beats)
+
+    array1 = get_nparray_from_track(track1)
+    array2 = get_nparray_from_track(track2)
+    
+    if array1.shape[0] < array2.shape[0]:
+        array2 = array2[:array1.shape[0]]
+    elif array1.shape[0] > array2.shape[0]:
+        array1 = array1[:array2.shape[0]]
+
+    return array1, array2
