@@ -1,5 +1,6 @@
 import pygame, pymunk
 from functions.drums import create_drums
+from functions.DrumStick import CreateDrumStick
 
 SCREEN_SIZE = (800, 600)
 FPS = 60
@@ -16,6 +17,7 @@ def main() -> None:
     clock: pygame.time.Clock = pygame.time.Clock()
 
     drums = create_drums(space)
+    drumstick = CreateDrumStick(space)
 
     running = True
     while running:
@@ -37,7 +39,8 @@ def main() -> None:
         drums.update()
         drums.draw(screen)
 
-
+        drumstick.update()
+        drumstick.draw(screen)
 
         pygame.display.flip()
 
