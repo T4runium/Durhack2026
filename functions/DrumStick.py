@@ -8,9 +8,9 @@ DrumStick_size = (182,12)
 def Create_DrumStick(Space : pymunk.Space):
     global DrumStick_size
 
-    body = pymunk.Body(2, 500, body_type= pymunk.Body.DYNAMIC )
+    body = pymunk.Body(2, 100, body_type= pymunk.Body.DYNAMIC )
     
-    body.position = (640,0)
+    body.position = pygame.mouse.get_pos()
 
     shape = pymunk.Poly.create_box(body , DrumStick_size )
     shape.elasticity = 1
@@ -58,6 +58,7 @@ class DrumStick(pygame.sprite.Sprite):
         self.image = pygame.transform.rotate(self.originalimage ,-math.degrees(self.shape.body.angle) )
         self.rect = self.image.get_rect(center = self.rect.center)
 
+    
 
 def CreateDrumStick(Space : pymunk.Space):
     return pygame.sprite.Group( DrumStick(Space) )  
@@ -67,7 +68,7 @@ class DrumStickDisplay(pygame.sprite.Sprite):
     def __init__(self):
         super().__init__()
 
-        self.image = pygame.image.load('graphics/bass.png').convert_alpha()
+        self.image = pygame.image.load('graphics/drumstick.png').convert_alpha()
 
         self.rect = self.image.get_rect(center=((DrumStick_size)))
 
@@ -75,14 +76,15 @@ class DrumStickDisplay(pygame.sprite.Sprite):
 
     def update(self):
         mouse_pos = pygame.mouse.get_pos()
-
-        if (mouse_pos[1] > 300):
+        
+        if ( pygame.mouse.get_pos()[1] > 300):
             self.image.set_alpha(50)
         else:
             self.image.set_alpha(100)
-
+        
 
         self.rect.center = mouse_pos
+
 
 
 def Create_TransparentSource():
