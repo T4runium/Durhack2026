@@ -1,4 +1,15 @@
+import os
+import sys
+from pathlib import Path
 import numpy as np
+
+import pygame
+
+PROJECT_ROOT = Path(__file__).parent
+sys.path.insert(0, str(PROJECT_ROOT.parent))
+os.chdir(PROJECT_ROOT)
+
+import SoundEngine
 
 class Layer:
     def __init__(self, num, next_num):
@@ -83,4 +94,19 @@ class Network:
         dW2, db2 = self.backward(g2, acts2, zs2)
         self.update([a + b for a, b in zip(dW1, dW2)], [a + b for a, b in zip(db1, db2)])
         return loss
+test = Network([2, 8, 8, 2])
 
+
+random_track: Track = SoundEngine.generate_random_track(120, 16)
+random_track2: Track = SoundEngine.generate_random_track(120, 16)
+    
+random_array: np.ndarray = SoundEngine.get_nparray_from_track(random_track)
+random_array2: np.ndarray = SoundEngine.get_nparray_from_track(random_track2)
+    
+if random_array.shape[0] < random_array2.shape[0]:
+    random_array2 = random_array2[:random_array.shape[0]]
+elif random_array.shape[0] > random_array2.shape[0]:
+    random_array = random_array[:random_array2.shape[0]]
+    
+error = test_random_beats.SoundEngine.check_audio_difference(e1, e2)
+print(test.train_step(random_array, random_array2, error))
