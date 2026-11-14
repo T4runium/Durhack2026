@@ -83,9 +83,10 @@ def main() -> None:
 
     for collision_type in range(2, 6):
         space.on_collision(1, collision_type, post_solve=bandmate.on_hit)
+        
+    gameState = gameStates.GameState.MENU
 
     running = True
-    gameState: gameStates.GameState = gameStates.GameState.DRUMMOVE # Start in DRUMMOVE state for testing
     while running:
 
         for event in pygame.event.get():
@@ -126,10 +127,11 @@ def main() -> None:
         match gameState:
             case gameStates.GameState.DRUMMOVE:
                 pass
+            case gameStates.GameState.MENU:
+                pass
             case gameStates.GameState.STICKDROP:
                 pass
-            case _:
-                pass
+            
 
     pygame.quit()
 
