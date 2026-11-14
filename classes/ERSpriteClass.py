@@ -1,3 +1,5 @@
+import pygame
+
 class ERSpriteClass:
     def __init__(self, image_path: str, sprite_size: tuple[int, int], frameRate: int):
         self.image_path = image_path
@@ -9,7 +11,7 @@ class ERSpriteClass:
         sprite_sheet = pygame.image.load(self.image_path).convert_alpha()
         
         # Calculate the number of frames in the sprite sheet
-        sheet_width, sheet_height = sprite_sheet.get_size()
+        sheet_width, _ = sprite_sheet.get_size()
         frame_width, frame_height = self.sprite_size
         num_frames = sheet_width // frame_width
         
