@@ -161,3 +161,27 @@ def clip_audio_arrays(arrays: list[np.ndarray], max_time: float):
     sample_rate, _, _ = mixer_settings
     max_samples = int(max_time * sample_rate)
     return [array[:max_samples] for array in arrays]
+
+def check_audio_difference(array1: np.ndarray, array2: np.ndarray) -> float:
+    """Return a difference score from 0.0 to 1.0."""
+    if array1.shape != array2.shape:
+        raise ValueError("Audio arrays must have the same shape.")
+
+    flat1 = array1.astype(np.float64).ravel()
+    flat2 = array2.astype(np.float64).ravel()
+
+    norm1 = np.linalg.norm(flat1)
+    norm2 = np.linalg.norm(flat2)
+
+    if norm1 == 0 and norm2 == 0:
+        return 0.0
+    if norm1 == 0 or norm2 == 0:
+        return 1.0
+
+    similarity = np.dot(flat1, flat2) / (norm1 * norm2)
+    similarity = np.clip(similarity, -1.0, 1.0)
+
+    return float((1.0 - similarity) / 2.0)
+
+def generate_random_track(bpm: int, track_length_beats: int):
+    pass
