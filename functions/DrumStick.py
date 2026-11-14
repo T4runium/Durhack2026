@@ -75,9 +75,9 @@ class DrumStick(pygame.sprite.Sprite):
         
         self.shape = Create_DrumStick(space)
         self.space = space
-
         self.image = pygame.image.load("graphics/bass.png").convert_alpha()
         self.rect = self.image.get_rect(center=((DrumStick_size)))
+        self.collision_type = 1
 
     def update(self):
         # Update the drumkit's position based on physics simulation
