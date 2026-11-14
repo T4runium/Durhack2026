@@ -18,8 +18,8 @@ from Durhack2026.types.soundTypes import Track
 
 def main() -> None:
     
-    random_track: Track = SoundEngine.generate_random_track(120, 16)
-    random_track2: Track = SoundEngine.generate_random_track(120, 16)
+    random_track: Track = SoundEngine.generate_random_track(120, 1024)
+    random_track2: Track = SoundEngine.generate_random_track(120, 1024)
     
     random_array: np.ndarray = SoundEngine.get_nparray_from_track(random_track)
     random_array2: np.ndarray = SoundEngine.get_nparray_from_track(random_track2)
