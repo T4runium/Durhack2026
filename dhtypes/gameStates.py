@@ -5,3 +5,4 @@ class GameState(Enum):
     MENU = 1
     DRUMMOVE = 2
     STICKDROP = 3
+    STICKMOVE = 4
