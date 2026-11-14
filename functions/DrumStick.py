@@ -3,20 +3,18 @@ import pygame
 
 import math
 
-DrumStick_size = (10,10)
+DrumStick_size = (125,50)
 
 def Create_DrumStick(Space : pymunk.Space):
     global DrumStick_size
 
-    body = pymunk.Body(1, 1, body_type= pymunk.Body.DYNAMIC )
+    body = pymunk.Body(1, 100, body_type= pymunk.Body.DYNAMIC )
     
     body.position = (400,0)
 
     shape = pymunk.Poly.create_box(body , DrumStick_size )
-    shape.elasticity = 0.75
+    shape.elasticity = 1
     Space.add(body , shape)
-
-    body.torque = 1
 
     return shape
 
