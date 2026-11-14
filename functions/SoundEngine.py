@@ -34,7 +34,7 @@ def play_sound_from_params(type: str, instrument: int,
     if impulse < IMPULSE_REJECTION_THRESHOLD:
         print(f"Ignored impulse {impulse} for {type} instrument {instrument} (below threshold).")
         return
-    impulse = max(0.0, min(1.0, impulse))  # Clamp impulse to [0.0, 1.0]
+    impulse = max(0.0, min(1.0, impulse / SCALE_FACTOR))  # Clamp impulse to [0.0, 1.0]
     if type not in sound_effects:
         return
     else:
