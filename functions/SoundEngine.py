@@ -49,22 +49,18 @@ def play_sound_from_params(type: str, instrument: int,
 def get_nparray_from_track(
     track: Track
     ) -> np.ndarray:
-    """Mix beat-timestamped track events into a NumPy audio array."""
+    """Mix sound events into a NumPy array using the Pygame mixer format."""
     mixer_settings = pygame.mixer.get_init()
     if mixer_settings is None:
         raise RuntimeError("The Pygame mixer must be initialized before mixing sounds.")
-    if track.bpm <= 0:
-        raise ValueError("Track BPM must be greater than zero.")
 
     sample_rate, _, channels = mixer_settings
     decoded_events: list[tuple[np.ndarray, int, float]] = []
     total_samples = 0
 
-    seconds_per_beat = 60.0 / track.bpm
-
-    for start_beat, event in track.sound_events:
-        if start_beat < 0:
-            raise ValueError("Sound event beat positions must not be negative.")
+    for start_time, event in track.sound_events:
+        if start_time < 0:
+            raise ValueError("Sound event start times must not be negative.")
 
         instrument_sounds = sound_effects.get(event.type)
         if instrument_sounds is None:
@@ -91,7 +87,6 @@ def get_nparray_from_track(
         else:
             samples = samples.reshape(-1, 1)
 
-        start_time = start_beat * seconds_per_beat
         start_sample = int(start_time * sample_rate)
         end_sample = start_sample + len(samples)
         volume = 0.5 + (velocity * 0.5)
@@ -106,3 +101,22 @@ def get_nparray_from_track(
         mixed[start_sample:end_sample] += samples * volume
 
     return np.clip(mixed, -32768, 32767).astype(np.int16)
+
+def play_sound_from_npdarray(audio_array: np.ndarray) -> None:
+    """Play a NumPy array as sound using the Pygame mixer."""
+    if audio_array.ndim == 1:
+        audio_array = audio_array.reshape(-1, 1)
+
+    channels = audio_array.shape[1]
+    mixer_settings = pygame.mixer.get_init()
+    if mixer_settings is None:
+        raise RuntimeError("The Pygame mixer must be initialized before playing sounds.")
+
+    _, _, mixer_channels = mixer_settings
+    if channels != mixer_channels:
+        raise ValueError(
+            f"Audio array has {channels} channels, but the mixer is set to {mixer_channels} channels."
+        )
+
+    sound = pygame.sndarray.make_sound(audio_array)
+    sound.play()

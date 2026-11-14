@@ -2,7 +2,6 @@ from pathlib import Path
 
 import pygame
 
-
 PROJECT_ROOT = Path(__file__).parent
 VELOCITIES_TO_TEST = (0.0, 0.5, 1.0)
 PAUSE_BETWEEN_SOUNDS_MS = 750
