@@ -118,6 +118,8 @@ def main() -> None:
 
         for i in range(sub_steps):
             space.step(1 / FPS / sub_steps) # update physics simulation
+            
+        self.player_hits
 
     pygame.quit()
 
