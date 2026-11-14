@@ -3,7 +3,7 @@ import pygame,pymunk
 class Drumkit(pygame.sprite.Sprite):
     def __init__(self, space, pos):
         super().__init__()
-        self.image = pygame.image.load("graphics/drumkit.png").convert_alpha()
+        self.image = pygame.image.load("graphics/bass.png").convert_alpha()
         self.rect = self.image.get_rect(center=(pos))
         self.space = space
         self.pos = pos
@@ -18,14 +18,10 @@ class Drumkit(pygame.sprite.Sprite):
         self.space.add(self.body, self.shape)
 
     def mouse_input(self):
-        if pygame.mouse.get_pressed()[0] and self.rect.collidepoint(pygame.mouse.get_pos()):
-            for drum in self.groups()[0]:  # Assuming all drums are in the same group
-                if drum != self and drum.rect.colliderect(self.rect):
-                    return  # Prevent moving if colliding with another drumkit
-            mouse_pos = pygame.mouse.get_pos()
-            self.body.position = mouse_pos
-            self.space.reindex_shapes_for_body(self.body)
-            self.rect.center = mouse_pos
+        mouse_pos = pygame.mouse.get_pos()
+        if self.rect.collidepoint(mouse_pos):
+            if pygame.mouse.get_pressed()[0]:  # Left mouse button
+                self.shape.body.apply_impulse_at_local_point((0, -500), (0, 0))
         
 
     def update(self):
@@ -67,7 +63,8 @@ class Kick(Drumkit):
 
 def create_drums(space: pymunk.Space) -> pygame.sprite.Group:
     return pygame.sprite.Group(
-        Cymbal(space, (600, 600)),
-        # Snare(space, (400, 400)),
-        Bass(space, (200, 600)),
+        Cymbal(space, (200, 600)),
+        Snare(space, (500, 600)),
+        Bass(space, (700, 600)),
+        Kick(space, (1000, 600))
     )

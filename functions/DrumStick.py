@@ -10,7 +10,7 @@ def Create_DrumStick(Space : pymunk.Space):
 
     body = pymunk.Body(1, 100, body_type= pymunk.Body.DYNAMIC )
     
-    body.position = (400,0)
+    body.position = (640,0)
 
     shape = pymunk.Poly.create_box(body , DrumStick_size )
     shape.elasticity = 1
@@ -37,7 +37,7 @@ class DrumStick(pygame.sprite.Sprite):
         self.shape = Create_DrumStick(space)
         self.space = space
         
-        self.image = pygame.image.load("graphics/bass.png").convert_alpha()
+        self.image = pygame.image.load("graphics/drumstick.png").convert_alpha()
         self.originalimage = self.image
         
         self.rect = self.image.get_rect(center=((DrumStick_size)))

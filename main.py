@@ -6,7 +6,7 @@ from functions.neural import neural
 
 import pymunk.pygame_util
 
-SCREEN_SIZE = (800, 600)
+SCREEN_SIZE = (1280, 720)
 FPS = 60
 
 space = pymunk.Space()
