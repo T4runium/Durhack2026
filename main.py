@@ -1,13 +1,11 @@
 import pygame, pymunk
-from drums import create_ball, draw_ball
+from functions.drums import Drumkit
 
 SCREEN_SIZE = (800, 600)
 FPS = 60
 
 space = pymunk.Space()
 space.gravity = (0, 900) # 900 pixels per second squared downward
-
-ball = create_ball(space) # create a static ball in the physics space
 
 
 def main() -> None:
@@ -16,6 +14,11 @@ def main() -> None:
     screen: pygame.Surface = pygame.display.set_mode(SCREEN_SIZE, pygame.RESIZABLE)
     pygame.display.set_caption("Durhack2026")
     clock: pygame.time.Clock = pygame.time.Clock()
+    drums = pygame.sprite.Group(
+    Drumkit(space, (400, 300)),
+    Drumkit(space, (600, 300)),
+    Drumkit(space, (200, 300)),
+)
 
     running = True
     while running:
@@ -34,9 +37,10 @@ def main() -> None:
 
         # drawing goes here
 
-        draw_ball(screen, ball)
+        drums.update()
+        drums.draw(screen)
 
-        
+
         pygame.display.flip()
 
         clock.tick(FPS)
