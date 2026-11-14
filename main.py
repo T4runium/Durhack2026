@@ -60,7 +60,7 @@ class Bandmate:
             self.answer_start = now
         if self.answer_start is not None:
             while self.queue and self.queue[0][0] * SPB <= now - self.answer_start:
-                _, ev = self.queue.pop(0)t p
+                _, ev = self.queue.pop(0)
                 SoundEngine.play_sound_from_params(ev.type, ev.instrument, ev.velocity)
             if now - self.answer_start >= ROUND_BEATS * SPB:   # answer finished: next round
                 self.player_hits.clear()
