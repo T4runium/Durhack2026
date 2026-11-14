@@ -1,7 +1,7 @@
 import pygame
 
 def play_sound_from_params(velocity: float, type: str, 
-    sound_effects: dict[str, dict[float, pygame.mixer.Sound]], pitch: float = 1.0) -> None:
+    sound_effects: dict[str, dict[float, pygame.mixer.Sound]]) -> None:
     if type not in sound_effects:
         return
     else:
