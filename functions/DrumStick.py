@@ -51,7 +51,7 @@ def Create_DrumStick(Space : pymunk.Space):
 
     body = pymunk.Body(1, 1, body_type= pymunk.Body.DYNAMIC )
     
-    body.position = (400,100)
+    body.position = (400,0)
 
     shape = pymunk.Poly.create_box(body , DrumStick_size )
     shape.elasticity = 1
@@ -77,7 +77,7 @@ class DrumStick(pygame.sprite.Sprite):
         self.space = space
         self.image = pygame.image.load("graphics/bass.png").convert_alpha()
         self.rect = self.image.get_rect(center=((DrumStick_size)))
-        self.collision_type = 1
+        self.shape.collision_type = 1
 
     def update(self):
         # Update the drumkit's position based on physics simulation
