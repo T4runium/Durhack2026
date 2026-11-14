@@ -17,7 +17,7 @@ def main() -> None:
     os.chdir(PROJECT_ROOT)
     from functions.SoundEngine import (
         Strength,
-        get_strength_from_velocity,
+        get_strength_from_impulse,
         play_sound_from_params,
         sound_effects,
     )
@@ -28,14 +28,14 @@ def main() -> None:
             0.5: Strength.MEDIUM,
             1.0: Strength.HARD,
         }
-        for velocity, expected_strength in expected_strengths.items():
-            actual_strength = get_strength_from_velocity(velocity)
+        for impulse, expected_strength in expected_strengths.items():
+            actual_strength = get_strength_from_impulse(impulse)
             assert actual_strength is expected_strength, (
-                f"Velocity {velocity} mapped to {actual_strength}, "
+                f"Impulse {impulse} mapped to {actual_strength}, "
                 f"expected {expected_strength}"
             )
 
-        print("Velocity mapping passed.")
+        print("Impulse mapping passed.")
         print("Playing configured sounds...")
         print("Press Ctrl+C to stop.")
 
@@ -44,13 +44,14 @@ def main() -> None:
                 if available_sounds is None:
                     continue
 
-                for velocity in VELOCITIES_TO_TEST:
-                    strength = get_strength_from_velocity(velocity)
+
+                for impulse in VELOCITIES_TO_TEST:
+                    strength = get_strength_from_impulse(impulse)
                     print(
                         f"{sound_type} instrument {instrument}: "
-                        f"velocity {velocity} -> {strength.name}"
+                        f"impulse {impulse} -> {strength.name}"
                     )
-                    play_sound_from_params(sound_type, instrument, velocity)
+                    play_sound_from_params(sound_type, instrument, impulse)
                     pygame.time.delay(PAUSE_BETWEEN_SOUNDS_MS)
     finally:
         pygame.mixer.stop()

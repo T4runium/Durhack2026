@@ -22,14 +22,15 @@ metronome_sound: pygame.mixer.Sound = pygame.mixer.Sound(
 )
 
 SCALE_FACTOR: int = 1700 # Adjust this factor to scale the velocity to [0.0, 1.0]
+VOLUME_FLOOR: float = 0.15 # Minimum volume level
 
-def get_strength_from_velocity(velocity: float) -> Strength:
-    """Get the strength category based on the velocity value."""
-    return min(Strength, key=lambda strength: abs(strength.value - velocity))
+def get_strength_from_impulse(impulse: float) -> Strength:
+    """Get the strength category based on the impulse value."""
+    return min(Strength, key=lambda strength: abs(strength.value - impulse))
 
 def play_sound_from_params(type: str, instrument: int,
-    velocity: float = 0.0) -> None:
-    velocity = max(0.0, min(1.0, velocity / SCALE_FACTOR))  # Clamp velocity to [0.0, 1.0]
+    impulse: float = 0.0) -> None:
+    impulse = max(0.0, min(1.0, impulse))  # Clamp impulse to [0.0, 1.0]
     if type not in sound_effects:
         return
     else:
@@ -38,12 +39,12 @@ def play_sound_from_params(type: str, instrument: int,
             return
         strength = min(
             instrument_sound_array,
-            key=lambda available_strength: abs(available_strength.value - velocity),
+            key=lambda available_strength: abs(available_strength.value - impulse),
         )
         sound: pygame.mixer.Sound = instrument_sound_array[strength]
-        sound.set_volume(0.5 + (velocity * 0.5))
+        sound.set_volume(VOLUME_FLOOR + (impulse * (1.0 - VOLUME_FLOOR)))
         sound.play()
-        print(f"Playing sound: {type}, instrument: {instrument}, strength: {strength.name}, normalised velocity: {velocity:.2f}, volume: {sound.get_volume():.2f}")
+        print(f"Playing sound: {type}, instrument: {instrument}, strength: {strength.name}, normalised impulse: {impulse:.2f}, volume: {sound.get_volume():.2f}")
         
 def play_sound_from_track(track: Track, metronome: bool = False) -> None:
     """Play a track in beat order, optionally playing a click on each beat."""
