@@ -96,6 +96,15 @@ class Network:
         self.update(dW, db)
         return loss
 
+    def train_step_mse(self, x, y):
+        """Regression version: plain outputs, mean squared error."""
+        out, acts, zs = self.forward(x)
+        out, y = np.atleast_2d(out), np.atleast_2d(y)
+        loss = ((out - y) ** 2).sum(axis=1).mean()
+        dW, db = self.backward(2 * (out - y) / len(y), acts, zs)
+        self.update(dW, db)
+        return loss
+
     def predict(self, x, temperature=1.0):
         """Probability of each drum being hit in the next slot. Higher temperature = wilder."""
         out = np.atleast_2d(self.forward(x)[0])
@@ -330,8 +339,274 @@ def test(net=None):
     return net
 
 
+# =====================================================================================
+# Imitator: an AI "hand" plays the actual game (pymunk drumstick) to copy a track.
+#
+# The game has one drumstick that falls and bounces on the drums. Each time the stick hits a
+# drum (or a planned hit is overdue), the hand sets the stick's velocity with projectile maths
+# so it lands on the next note's drum at the right moment. No network here: a learned aim was
+# tried and lost to the formula (flight is pure gravity, which the formula solves exactly).
+# Pair it with the bandmate: the network composes or answers, the imitator plays it in the game.
+# =====================================================================================
+import pymunk
+from DrumStick import Create_DrumStick
+
+FPS = 60                     # main.py: clock.tick(FPS), space.step(1 / FPS)
+GRAVITY = 900                # main.py: space.gravity = (0, 900)
+# Copy of drums.create_drums: collision type -> centre. Update if the drums move.
+DRUM_LAYOUT = {2: (600, 600), 3: (400, 600), 4: (200, 600)}
+DRUM_SIZE = 100
+DRUM_TYPES = sorted(DRUM_LAYOUT)
+DRUM_NAMES = {2: "cymbal", 3: "snare", 4: "bass"}
+# CollisionHandler._SOUND_BY_DRUM_TYPE: drum -> drums1 instrument it plays
+DRUM_INSTRUMENT = {2: 1, 3: 7, 4: 5}
+# Track instrument -> which of the 3 game drums plays it
+INSTRUMENT_TO_DRUM = {CYMBAL: 2, HIHAT: 2, SNARE: 3, TOM_HI: 3, TOM_MID: 4, TOM_LO: 4, KICK: 4}
+STICK_HALF = (62.5, 25)      # DrumStick_size / 2
+START_POS = (400, 300)       # where the hand picks the stick up
+LEAD_IN = 1.0                # seconds before the track's first beat
+MIN_GAP = 0.1                # notes closer than this (one stick!) are merged
+
+
+def build_space():
+    """Headless copy of the game's physics: the real drumstick + the drums."""
+    space = pymunk.Space()
+    space.gravity = (0, GRAVITY)
+    stick = Create_DrumStick(space)
+    stick.collision_type = 1
+    for ct, pos in DRUM_LAYOUT.items():
+        body = pymunk.Body(1, 100, body_type=pymunk.Body.STATIC)
+        body.position = pos
+        shape = pymunk.Poly.create_box(body, (DRUM_SIZE, DRUM_SIZE))
+        shape.elasticity = 1
+        shape.collision_type = ct
+        space.add(body, shape)
+    return space, stick.body
+
+
+def reset_stick(body):
+    body.position = START_POS
+    body.velocity = (0, 0)
+    body.angle = 0
+    body.angular_velocity = 0
+
+
+def physics_aim(body, drum, dt):
+    """Velocity that makes the stick land on top of `drum` in `dt` seconds (projectile motion)."""
+    x, y = body.position
+    a = body.angle
+    half_height = STICK_HALF[0] * abs(np.sin(a)) + STICK_HALF[1] * abs(np.cos(a))
+    tx, ty = DRUM_LAYOUT[drum][0], DRUM_LAYOUT[drum][1] - DRUM_SIZE / 2 - half_height
+    return np.array([(tx - x) / dt, (ty - y - 0.5 * GRAVITY * dt ** 2) / dt])
+
+
+def is_lost(body):
+    x, y = body.position
+    return not (-200 < x < 1000 and y < 900)
+
+
+def track_to_notes(track):
+    """Track -> list of (seconds after start, game drum). One stick, so near-simultaneous notes merge."""
+    spb = 60.0 / track.bpm
+    priority = {3: 0, 4: 1, 2: 2}   # when notes clash keep snare, then bass, then cymbal
+    notes = []
+    for beat, event in sorted(track.sound_events, key=lambda e: e[0]):
+        drum = INSTRUMENT_TO_DRUM.get(event.instrument)
+        if drum is None:
+            continue
+        t = LEAD_IN + beat * spb
+        if notes and t - notes[-1][0] < MIN_GAP:
+            if priority[drum] < priority[notes[-1][1]]:
+                notes[-1] = (notes[-1][0], drum)
+            continue
+        notes.append((t, drum))
+    return notes
+
+
+class Imitator:
+    """Controller shared by the headless sim and the real game window.
+    Call before_step(now, body) every frame and on_hit(now, drum, impulse) on every first contact."""
+
+    def __init__(self, notes, aim):
+        self.notes = notes
+        self.aim = aim                  # function (body, drum, dt) -> velocity
+        self.next = 0                   # index of the note we are currently throwing for
+        self.need_action = True
+        self.hits = []                  # what was actually played: (time, drum, impulse)
+
+    def on_hit(self, now, drum, impulse):
+        self.hits.append((now, drum, impulse))
+        if (self.next < len(self.notes) and self.notes[self.next][1] == drum
+                and abs(self.notes[self.next][0] - now) < 0.15):
+            self.next += 1              # that was (roughly) the planned hit: aim for the next one
+            self.need_action = True
+
+    def before_step(self, now, body):
+        if self.next < len(self.notes) and now > self.notes[self.next][0] + 0.1:
+            self.next += 1              # missed it: give up on that note and aim for the next one
+            self.need_action = True
+        if is_lost(body):
+            reset_stick(body)
+            self.need_action = True
+        if self.need_action:            # skip notes that are too close to reach in time
+            while self.next < len(self.notes) and self.notes[self.next][0] - now < 1.0 / FPS:
+                self.next += 1
+        if self.need_action and self.next < len(self.notes):
+            t, drum = self.notes[self.next]
+            dt = t - now
+            body.velocity = tuple(float(v) for v in self.aim(body, drum, dt))
+            self.need_action = False
+
+    @property
+    def done(self):
+        return self.next >= len(self.notes)
+
+
+def _watch_hits(space, callback):
+    def post_solve(arbiter, space, data):
+        if arbiter.is_first_contact:
+            drum = next(s.collision_type for s in arbiter.shapes if s.collision_type != 1)
+            callback(drum, arbiter.total_impulse.length)
+    for ct in DRUM_TYPES:
+        space.on_collision(1, ct, post_solve=post_solve)
+
+
+def simulate(track, aim, extra_time=1.0):
+    """Play a track headlessly. Returns the Imitator (with .hits) and the notes it aimed for."""
+    space, body = build_space()
+    reset_stick(body)
+    notes = track_to_notes(track)
+    ctrl = Imitator(notes, aim)
+    frame = [0]
+    _watch_hits(space, lambda drum, imp: ctrl.on_hit(frame[0] / FPS, drum, imp))
+    end = (notes[-1][0] if notes else 0) + extra_time
+    while frame[0] / FPS < end:
+        ctrl.before_step(frame[0] / FPS, body)
+        space.step(1 / FPS)
+        frame[0] += 1
+    return ctrl, notes
+
+
+def score(notes, hits, window=0.07):
+    """Match played hits to notes (same drum, within `window` seconds)."""
+    used, matched, errors = set(), 0, []
+    for t, drum in notes:
+        best = None
+        for i, (ht, hd, _) in enumerate(hits):
+            if i not in used and hd == drum and abs(ht - t) <= window and (best is None or abs(ht - t) < abs(hits[best][0] - t)):
+                best = i
+        if best is not None:
+            used.add(best)
+            matched += 1
+            errors.append(abs(hits[best][0] - t))
+    return {"hit_rate": matched / max(1, len(notes)),
+            "timing_ms": 1000 * float(np.mean(errors)) if errors else float("nan"),
+            "extra_hits": len(hits) - len(used)}
+
+
+def hits_to_track(hits, bpm=120, name="Imitation"):
+    """What the AI actually played, as a Track you can show / play / compare."""
+    spb = 60.0 / bpm
+    events = [((t - LEAD_IN) / spb, SoundEngine.SoundEvent("drums1", DRUM_INSTRUMENT[d], imp))
+              for t, d, imp in hits if t >= LEAD_IN - 0.1]
+    return SoundEngine.Track(name=name, bpm=bpm, sound_events=events)
+
+
+def imitate(track):
+    """Headless: the AI plays `track` in the game physics. Returns (what it played as a Track, score)."""
+    ctrl, notes = simulate(track, physics_aim)
+    return hits_to_track(ctrl.hits, track.bpm), score(notes, ctrl.hits)
+
+
+def play_in_game(track):
+    """Open the game window and let the network play `track` with the real drums, stick and sounds."""
+    from Durhack2026.functions.drums import create_drums
+    from Durhack2026.functions.DrumStick import CreateDrumStick
+    from Durhack2026.functions.CollisionHandler import on_hit as game_on_hit
+
+    pygame.init()
+    screen = pygame.display.set_mode((800, 600), pygame.RESIZABLE)
+    pygame.display.set_caption(f"AI imitating: {track.name}")
+    clock = pygame.time.Clock()
+    space = pymunk.Space()
+    space.gravity = (0, GRAVITY)
+    drums = create_drums(space)
+    stick_group = CreateDrumStick(space)
+    body = next(iter(stick_group)).shape.body
+    reset_stick(body)
+
+    notes = track_to_notes(track)
+    ctrl = Imitator(notes, physics_aim)
+    frame = 0
+
+    def post_solve(arbiter, space, data):
+        game_on_hit(arbiter, space, data)          # the game's own sound + print
+        if arbiter.is_first_contact:
+            drum = next(s.collision_type for s in arbiter.shapes if s.collision_type != 1)
+            ctrl.on_hit(frame / FPS, drum, arbiter.total_impulse.length)
+    for ct in DRUM_TYPES:
+        space.on_collision(1, ct, post_solve=post_solve)
+
+    end = (notes[-1][0] if notes else 0) + 1.5
+    running = True
+    while running and frame / FPS < end:
+        for event in pygame.event.get():
+            if event.type == pygame.QUIT:
+                running = False
+        ctrl.before_step(frame / FPS, body)
+        screen.fill((0, 0, 0))
+        drums.update()
+        drums.draw(screen)
+        stick_group.update()
+        stick_group.draw(screen)
+        pygame.display.flip()
+        clock.tick(FPS)
+        space.step(1 / FPS)
+        frame += 1
+    pygame.quit()
+    result = score(notes, ctrl.hits)
+    print(f"hit {result['hit_rate']:.0%} of notes, average {result['timing_ms']:.0f} ms off, "
+          f"{result['extra_hits']} extra hits")
+    return hits_to_track(ctrl.hits, track.bpm), result
+
+
+def test_imitator(tracks=None):
+    """Play each level + some generated grooves headlessly and report how well the AI copied them."""
+    if tracks is None:
+        tracks = []
+        try:
+            from Durhack2026.levels import Chp1
+            tracks += list(Chp1.levels)
+        except ImportError:
+            pass
+        np.random.seed(5)
+        tracks += [decode_grid(make_groove(2), name=f"random groove {i}") for i in range(5)]
+    for track in tracks:
+        _, r = imitate(track)
+        print(f"{track.name:32s} hit {r['hit_rate']:4.0%}  {r['timing_ms']:3.0f} ms off  "
+              f"{r['extra_hits']} extra hits")
+
+
+def jam(n_bars=4, seed_track=None):
+    """The bandmate network composes n_bars, then the imitator plays them in the game window."""
+    track = generate(load(), seed_track, n_bars * 4)
+    show(track, title="bandmate composed:")
+    played, _ = play_in_game(track)
+    show(played, title="imitator played:")
+
+
 if __name__ == "__main__":
-    if "test" in sys.argv:
+    if "imitate" in sys.argv:
+        from Durhack2026.levels import Chp1
+        level = Chp1.levels[int(sys.argv[-1]) if sys.argv[-1].isdigit() else 0]
+        show(level, title=f"{level.name}:")
+        played, _ = play_in_game(level)
+        show(played, title="AI played:")
+    elif "test_imitator" in sys.argv:
+        test_imitator()
+    elif "jam" in sys.argv:
+        jam()
+    elif "test" in sys.argv:
         test()
     elif "play" in sys.argv:
         track = generate(load(), None, 16)
