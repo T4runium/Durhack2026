@@ -75,7 +75,6 @@ class Network:
             self.network[i].biases -= self.learningRate * db[i]
 
     def train_step(self, x1, x2, y, margin=1.0):
-        # One Siamese step: both inputs go through the same weights, gradients from both branches are summed
         e1, acts1, zs1 = self.forward(x1)
         e2, acts2, zs2 = self.forward(x2)
         loss = self.contrastive(e1, e2, y, margin)
@@ -85,5 +84,3 @@ class Network:
         self.update([a + b for a, b in zip(dW1, dW2)], [a + b for a, b in zip(db1, db2)])
         return loss
 
-test = Network([2, 8, 8, 2])
-test.forward([5, 5])
