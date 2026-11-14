@@ -7,7 +7,7 @@ SCREEN_SIZE = (800, 600)
 FPS = 60
 
 space = pymunk.Space()
-space.gravity = (0, 900) # 900 pixels per second squared downward
+space.gravity = (0, 500) # 500 pixels per second squared downward
 
 
 def main() -> None:
