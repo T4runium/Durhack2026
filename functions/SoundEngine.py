@@ -1,7 +1,7 @@
 import pygame
 import numpy as np
-from ..types.soundTypes import Strength, Track
-from ..sounds.sound_effect_dict import sound_effects
+from Durhack2026.types.soundTypes import SoundEvent, Strength, Track
+from Durhack2026.sounds.sound_effect_dict import sound_effects
 
 metronome_sound: pygame.mixer.Sound = pygame.mixer.Sound(
     "./sounds/metronome/freesoundMetronome.mp3"
@@ -184,4 +184,21 @@ def check_audio_difference(array1: np.ndarray, array2: np.ndarray) -> float:
     return float((1.0 - similarity) / 2.0)
 
 def generate_random_track(bpm: int, track_length_beats: int):
-    pass
+    """Generate a random track with sound events."""
+    if bpm <= 0:
+        raise ValueError("BPM must be greater than zero.")
+    if track_length_beats <= 0:
+        raise ValueError("Track length in beats must be greater than zero.")
+
+    sound_types = list(sound_effects.keys())
+    instruments = {stype: list(sound_effects[stype].keys()) for stype in sound_types}
+    sound_events: list[tuple[float, SoundEvent]] = []
+
+    for beat in range(track_length_beats):
+        if np.random.rand() < 0.5:
+            stype = np.random.choice(sound_types)
+            instrument = np.random.choice(instruments[stype])
+            velocity = np.random.uniform(0.0, SCALE_FACTOR)
+            sound_events.append((float(beat), SoundEvent(stype, instrument, velocity)))
+
+    return Track(name="Random Track", bpm=bpm, sound_events=sound_events)
