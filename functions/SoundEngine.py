@@ -1,4 +1,5 @@
 import os
+from random import random
 import sys
 from pathlib import Path
 
@@ -182,26 +183,163 @@ def clip_audio_arrays(arrays: list[np.ndarray], max_time: float):
     max_samples = int(max_time * sample_rate)
     return [array[:max_samples] for array in arrays]
 
-def check_audio_difference(array1: np.ndarray, array2: np.ndarray) -> float:
-    """Return a difference score from 0.0 to 1.0."""
-    if array1.shape != array2.shape:
-        raise ValueError("Audio arrays must have the same shape.")
+def check_audio_difference(
+    target: np.ndarray,
+    recorded: np.ndarray,
+    sample_rate: int | None = None,
+    bpm: float = 120.0,
+    subdivisions_per_beat: int = 4,
+    activity_threshold: float = 0.2,
+    timing_tolerance: float | None = None,
+) -> float:
+    """Return a beat-pattern difference score from 0.0 to 1.0.
 
-    flat1 = array1.astype(np.float64).ravel()
-    flat2 = array2.astype(np.float64).ravel()
+    The score combines timing, volume, and spectral timbre. Missing and
+    additional detected hits receive a score of zero.
+    """
+    if bpm <= 0:
+        raise ValueError("BPM must be greater than zero.")
+    if subdivisions_per_beat <= 0:
+        raise ValueError("Subdivisions per beat must be greater than zero.")
+    if not 0.0 <= activity_threshold <= 1.0:
+        raise ValueError("Activity threshold must be between zero and one.")
 
-    norm1 = np.linalg.norm(flat1)
-    norm2 = np.linalg.norm(flat2)
+    if sample_rate is None:
+        mixer_settings = pygame.mixer.get_init()
+        if mixer_settings is None:
+            raise RuntimeError(
+                "The Pygame mixer must be initialized when sample_rate is omitted."
+            )
+        sample_rate = mixer_settings[0]
 
-    if norm1 == 0 and norm2 == 0:
+    if target.ndim not in (1, 2) or recorded.ndim not in (1, 2):
+        raise ValueError("Audio arrays must be one- or two-dimensional.")
+
+    def to_mono(audio: np.ndarray) -> np.ndarray:
+        if audio.ndim == 1:
+            return audio.astype(np.float64)
+        return audio.astype(np.float64).mean(axis=1)
+
+    target_mono = to_mono(target)
+    recorded_mono = to_mono(recorded)
+    subdivision_samples = max(
+        1,
+        round(sample_rate * 60.0 / bpm / subdivisions_per_beat),
+    )
+    subdivision_duration = subdivision_samples / sample_rate
+    timing_limit = timing_tolerance or subdivision_duration
+    slot_count = max(
+        1,
+        int(
+            np.ceil(
+                max(len(target_mono), len(recorded_mono))
+                / subdivision_samples
+            )
+        ),
+    )
+
+    def get_features(
+        audio: np.ndarray,
+    ) -> tuple[np.ndarray, np.ndarray, np.ndarray, float]:
+        energies = np.zeros(slot_count) 
+        timing_offsets = np.zeros(slot_count)
+        spectra = np.zeros((slot_count, subdivision_samples // 2 + 1))
+
+        for slot in range(slot_count):
+            start = slot * subdivision_samples
+            section = audio[start:start + subdivision_samples]
+            if len(section) == 0:
+                continue
+
+            padded = np.zeros(subdivision_samples)
+            padded[:len(section)] = section
+            absolute = np.abs(padded)
+            energy = np.sqrt(np.mean(padded**2))
+            energies[slot] = energy
+
+            if energy > 0:
+                timing_offsets[slot] = (
+                    np.average(
+                        np.arange(subdivision_samples),
+                        weights=absolute,
+                    )
+                    / sample_rate
+                )
+
+            windowed = padded * np.hanning(subdivision_samples)
+            spectrum = np.abs(np.fft.rfft(windowed))
+            spectrum_norm = np.linalg.norm(spectrum)
+            if spectrum_norm > 0:
+                spectra[slot] = spectrum / spectrum_norm
+
+        return energies, timing_offsets, spectra, np.max(energies)
+
+    target_energy, target_timing, target_spectra, target_max = get_features(
+        target_mono
+    )
+    recorded_energy, recorded_timing, recorded_spectra, recorded_max = get_features(
+        recorded_mono
+    )
+
+    target_hits = np.flatnonzero(
+        target_energy >= target_max * activity_threshold
+    ) if target_max > 0 else np.array([], dtype=int)
+    recorded_hits = np.flatnonzero(
+        recorded_energy >= recorded_max * activity_threshold
+    ) if recorded_max > 0 else np.array([], dtype=int)
+
+    unmatched_recorded = set(recorded_hits.tolist())
+    matched_scores: list[float] = []
+    volume_tolerance_db = 12.0
+
+    for target_slot in target_hits:
+        if not unmatched_recorded:
+            break
+
+        recorded_slot = min(
+            unmatched_recorded,
+            key=lambda slot: abs(slot - target_slot),
+        )
+        timing_difference = abs(
+            (recorded_slot - target_slot) * subdivision_duration
+            + recorded_timing[recorded_slot]
+            - target_timing[target_slot]
+        )
+
+        if timing_difference > timing_limit:
+            continue
+
+        unmatched_recorded.remove(recorded_slot)
+        timing_score = np.exp(-timing_difference / timing_limit)
+
+        target_db = 20.0 * np.log10(max(target_energy[target_slot], 1e-12))
+        recorded_db = 20.0 * np.log10(max(recorded_energy[recorded_slot], 1e-12))
+        volume_score = np.exp(
+            -abs(target_db - recorded_db) / volume_tolerance_db
+        )
+
+        timbre_similarity = float(
+            np.dot(
+                target_spectra[target_slot],
+                recorded_spectra[recorded_slot],
+            )
+        )
+        timbre_score = np.clip((timbre_similarity + 1.0) / 2.0, 0.0, 1.0)
+
+        matched_scores.append(
+            0.40 * timing_score
+            + 0.25 * volume_score
+            + 0.35 * timbre_score
+        )
+
+    total_hits = max(len(target_hits), len(recorded_hits))
+    if total_hits == 0:
         return 0.0
-    if norm1 == 0 or norm2 == 0:
-        return 1.0
 
-    similarity = np.dot(flat1, flat2) / (norm1 * norm2)
-    similarity = np.clip(similarity, -1.0, 1.0)
-
-    return float((1.0 - similarity) / 2.0)
+    difference = 1.0 - (sum(matched_scores) / total_hits)
+    if np.isclose(difference, 0.0):
+        return 0.0
+    return float(np.clip(difference, 0.0, 1.0))
 
 def generate_random_track(bpm: int, track_length_beats: int):
     """Generate a random track with sound events."""
@@ -222,7 +360,7 @@ def generate_random_track(bpm: int, track_length_beats: int):
             sound_events.append((float(beat), SoundEvent(stype, instrument, velocity)))
             
     #scale beat to quarter beats
-    sound_events = [(beat / 4.0, event) for beat, event in sound_events]
+    sound_events = [(beat / 4.0 + random() * 0.5 - 0.25, event) for beat, event in sound_events]
 
     return Track(name="Random Track", bpm=bpm, sound_events=sound_events)
 
