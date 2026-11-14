@@ -50,3 +50,4 @@ def play_sound_from_params(type: str, instrument: int,
         )
         sound: pygame.mixer.Sound = instrument_sound_array[closest_strength]
         sound.play()
+        
