@@ -17,9 +17,21 @@ class Drumkit(pygame.sprite.Sprite):
         self.shape.elasticity = 1
         self.space.add(self.body, self.shape)
 
+    def mouse_input(self):
+        if pygame.mouse.get_pressed()[0] and self.rect.collidepoint(pygame.mouse.get_pos()):
+            for drum in self.groups()[0]:  # Assuming all drums are in the same group
+                if drum != self and drum.rect.colliderect(self.rect):
+                    return  # Prevent moving if colliding with another drumkit
+            mouse_pos = pygame.mouse.get_pos()
+            self.body.position = mouse_pos
+            self.space.reindex_shapes_for_body(self.body)
+            self.rect.center = mouse_pos
+        
+
     def update(self):
         # Update the drumkit's position based on physics simulation
         self.rect.center = round(self.body.position.x), round(self.body.position.y)
+        self.mouse_input()
 
 class Cymbal(Drumkit):
     def __init__(self, space, pos):
@@ -55,7 +67,7 @@ class Kick(Drumkit):
 
 def create_drums(space: pymunk.Space) -> pygame.sprite.Group:
     return pygame.sprite.Group(
-        # Cymbal(space, (600, 600)),
-        Snare(space, (400, 400)),
-        # Bass(space, (200, 600)),
+        Cymbal(space, (600, 600)),
+        # Snare(space, (400, 400)),
+        Bass(space, (200, 600)),
     )

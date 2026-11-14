@@ -34,6 +34,7 @@ def main() -> None:
             if event.type == pygame.QUIT:
 
                 running = False
+
             elif event.type == pygame.VIDEORESIZE:
 
                 scrsize = event.size
