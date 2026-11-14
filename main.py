@@ -5,6 +5,8 @@ from functions.DrumStick import CreateDrumStick
 from functions.neural import neural
 import pymunk.pygame_util
 
+from .types import gameStates
+
 SCREEN_SIZE = (800, 600)
 FPS = 60
 
@@ -65,6 +67,7 @@ class Bandmate:
                 self.queue.clear()
                 self.round_start, self.answer_start = now, None
 
+gameState: gameStates.GameState = gameStates.GameState.LOADING
 
 def main() -> None:
     """Run the main Pygame application loop."""
@@ -82,6 +85,7 @@ def main() -> None:
         space.on_collision(1, collision_type, post_solve=bandmate.on_hit)
 
     running = True
+    gameState: gameStates.GameState = gameStates.GameState.DRUMMOVE # Start in DRUMMOVE state for testing
     while running:
 
         for event in pygame.event.get():
@@ -118,6 +122,14 @@ def main() -> None:
 
         for i in range(sub_steps):
             space.step(1 / FPS / sub_steps) # update physics simulation
+            
+        match gameState:
+            case gameStates.GameState.DRUMMOVE:
+                pass
+            case gameStates.GameState.STICKDROP:
+                pass
+            case _:
+                pass
 
     pygame.quit()
 
