@@ -55,7 +55,7 @@ class Kick(Drumkit):
 
 def create_drums(space: pymunk.Space) -> pygame.sprite.Group:
     return pygame.sprite.Group(
-        Cymbal(space, (600, 600)),
-        Snare(space, (400, 600)),
-        Bass(space, (200, 600)),
+        # Cymbal(space, (600, 600)),
+        Snare(space, (400, 400)),
+        # Bass(space, (200, 600)),
     )
