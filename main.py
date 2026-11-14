@@ -3,7 +3,6 @@ from functions.drums import create_drums
 from functions.CollisionHandler import on_hit as game_on_hit
 from functions.DrumStick import CreateDrumStick
 from functions.neural import neural
-
 import pymunk.pygame_util
 
 from .types import gameStates
