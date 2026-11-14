@@ -605,6 +605,6 @@ if __name__ == "__main__":
         show(track, title="playing:")
         SoundEngine.play_sound_from_track(track)
     else:
-        test(train())
+        pass
+        #test(train())
 
-test(train())
