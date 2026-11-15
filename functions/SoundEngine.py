@@ -34,6 +34,15 @@ def get_strength_from_impulse(impulse: float) -> Strength:
     """Get the strength category based on the impulse value."""
     return min(Strength, key=lambda strength: abs(strength.value - impulse))
 
+def play_sound_from_path(file_path: str, volume: float = 1.0) -> None:
+    """Play a sound from a file path with the specified volume."""
+    if not os.path.isfile(file_path):
+        raise FileNotFoundError(f"Sound file not found: {file_path}")
+    
+    sound = pygame.mixer.Sound(file_path)
+    sound.set_volume(max(0.0, min(1.0, volume)))  # Clamp volume to [0.0, 1.0]
+    sound.play()
+
 def play_sound_from_params(type: str, instrument: int,
     impulse: float = 0.0) -> None:
     if impulse < IMPULSE_REJECTION_THRESHOLD:
