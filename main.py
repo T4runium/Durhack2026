@@ -265,9 +265,6 @@ def main() -> None:
 
                             drumstick = Create_TransparentSource()
 
-        print(accuracy_score)
-
-                       
         sub_steps = 10
 
         for i in range(sub_steps):
