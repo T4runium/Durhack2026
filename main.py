@@ -2,12 +2,10 @@ import pygame, pymunk
 from functions.drums import Drumkit, create_all, create_cymbal
 from functions.CollisionHandler import register_collision_handlers
 from functions.DrumStick import CreateDrumStick , Create_TransparentSource , DrumStick
+from functions import SoundEngine
 from classes.button import Button
-<<<<<<< HEAD
-=======
 import levels.Chp1 as Chp1
 import classes.AccuracyTracker as AccuracyTracker
->>>>>>> 16ef03e0385e5828373d497085cc84e9bd22f6e2
 
 import pymunk.pygame_util
 
@@ -175,6 +173,13 @@ def main() -> None:
 
                     drumstick = CreateDrumStick(space)
                     gameState = gameStates.GameState.STICKDROP
+            elif gameState == gameStates.GameState.STICKDROP:
+                
+                if event.type == pygame.MOUSEBUTTONDOWN:
+                    for j in drumstick:
+                        if (isinstance(j,DrumStick)):
+                            if (j.rect.collidepoint(event.pos)):
+                                SoundEngine.play_sound_from_params("drums1", 8)
 
 
         screen.blit(background , (0,0)) # replace with ui image when ready
