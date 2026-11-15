@@ -58,11 +58,11 @@ def drag_drum(drums, active_drum: Drumkit, rel) -> None:
 def record_hit(instrument: int, impulse: float) -> None:
     global accuracy_score
 
-    beat = (
-        (pygame.time.get_ticks() / 1000.0 - track_start_time)
-        * ongoing_track.bpm
-        / 60.0
-    )
+    current_time = pygame.time.get_ticks() / 1000.0
+    if current_time < track_start_time:
+        return
+
+    beat = (current_time - track_start_time) * ongoing_track.bpm / 60.0
 
     ongoing_track.sound_events.append(
         (
@@ -148,6 +148,11 @@ def main() -> None:
 
                 elif event.type == pygame.KEYDOWN and event.key in (pygame.K_RETURN, pygame.K_SPACE):
                     active_drum = None
+                    stick_move_start_time = pygame.time.get_ticks() / 1000.0
+                    track_start_time = (
+                        stick_move_start_time
+                        + 4 * 60.0 / ongoing_track.bpm
+                    )
                     gameState = gameStates.GameState.STICKMOVE
 
             elif gameState == gameStates.GameState.STICKMOVE:
@@ -157,7 +162,6 @@ def main() -> None:
 
                     drumstick = CreateDrumStick(space)
                     gameState = gameStates.GameState.STICKDROP
-                    track_start_time = pygame.time.get_ticks() / 1000.0  # Record the start time of the track
 
 
         screen.blit(background , (0,0)) # replace with ui image when ready
