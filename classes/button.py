@@ -30,16 +30,15 @@ class Button:
         if clicked:
             self.on_click()
 
-            if self.drum_type != None:
-                instrument, label = _SOUND_BY_DRUM_TYPE[self.drum_type]
-                impulse = 1000
-                from functions.SoundEngine import play_sound_from_params
-                play_sound_from_params("drums1", instrument, impulse)
+            from functions.SoundEngine import play_sound_from_params
+
+            if self.drum_type is not None:
+                instrument, _ = _SOUND_BY_DRUM_TYPE[self.drum_type]
+                play_sound_from_params("drums1", instrument, 1000)
 
             else:
-                from sounds.sound_effect_dict import sound_effects
-                sound_effects["ui",1].play()
-
+                play_sound_from_params("ui", 1, 1000)
+    
         return clicked
 
     def draw(self, surface):
