@@ -47,32 +47,30 @@ class Kick(Drumkit):
         self.image = pygame.image.load("graphics/kick.png").convert_alpha()
         self.rect = self.image.get_rect(center=(pos))
 
-def create_cymbal(space: pymunk.Space) -> pygame.sprite.Group:
-    return pygame.sprite.Group(
+def create_cymbal(space: pymunk.Space, group: pygame.sprite.Group) -> None:
+    group.add(
         Cymbal(space, (200, 600))
     )
 
-def create_snare(space: pymunk.Space) -> pygame.sprite.Group:
-    return pygame.sprite.Group(
+def create_snare(space: pymunk.Space, group: pygame.sprite.Group) -> None:
+    group.add(
         Snare(space, (500, 600)),
     )
 
-def create_bass(space: pymunk.Space) -> pygame.sprite.Group:
-    return pygame.sprite.Group(
+def create_bass(space: pymunk.Space, group: pygame.sprite.Group) -> None:
+    group.add(
         Bass(space, (800, 600)),
     )
 
-def create_kick(space: pymunk.Space) -> pygame.sprite.Group:
-    return pygame.sprite.Group(
+def create_kick(space: pymunk.Space, group: pygame.sprite.Group) -> None:
+    group.add(
         Kick(space, (1100, 600))
     )
 
 def create_all(space: pymunk.Space) -> pygame.sprite.Group:
     drums = pygame.sprite.Group()
-    drums.add(
-        create_cymbal(space),
-        create_snare(space),
-        create_bass(space),
-        create_kick(space),
-    )
+    create_cymbal(space, drums)
+    create_snare(space, drums)
+    create_bass(space, drums)
+    create_kick(space, drums)
     return drums
