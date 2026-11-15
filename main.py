@@ -3,8 +3,11 @@ from functions.drums import Drumkit, create_all, create_cymbal
 from functions.CollisionHandler import register_collision_handlers
 from functions.DrumStick import CreateDrumStick , Create_TransparentSource , DrumStick
 from classes.button import Button
+<<<<<<< HEAD
+=======
 import levels.Chp1 as Chp1
 import classes.AccuracyTracker as AccuracyTracker
+>>>>>>> 16ef03e0385e5828373d497085cc84e9bd22f6e2
 
 import pymunk.pygame_util
 
@@ -21,7 +24,6 @@ space.gravity = (0, 750) # 500 pixels per second squared downward
 space.damping = 1
 
 gameState: gameStates.GameState = gameStates.GameState.DRUMMOVE
-
 
 background = pygame.image.load('graphics/backgrounds/BG1.png')
 background = pygame.transform.scale(background , SCREEN_SIZE)
