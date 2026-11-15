@@ -2,10 +2,11 @@ import pygame, pymunk
 from functions.drums import Drumkit, create_drums
 from functions.CollisionHandler import register_collision_handlers
 from functions.DrumStick import CreateDrumStick , Create_TransparentSource
+
 import pymunk.pygame_util
 
 SCREEN_SIZE = (1280, 720)
-from dhtypes import gameStates
+from dhtypes import gameStates, soundTypes
 
 def IsValidPosition():
     return pygame.mouse.get_pos()[1] < 300
@@ -55,6 +56,9 @@ def main() -> None:
     # Create instances here
     drums = create_drums(space)
     drumstick : pygame.sprite.Group = Create_TransparentSource()
+    
+    current_track: soundTypes.Track | None = None
+    ongoing_track: soundTypes.Track | None = None
 
     register_collision_handlers(space)
 
