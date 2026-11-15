@@ -24,6 +24,7 @@ def IsValidPosition():
     return pygame.mouse.get_pos()[1] < 300
 
 FPS = 60
+INTRO_DURATION = 1.0
 
 space = pymunk.Space()
 space.gravity = (0, 750) # 500 pixels per second squared downward
@@ -137,6 +138,23 @@ def set_current_track_from_index(chapter: int, index: int) -> None:
         current_track.bpm,
     )
 
+def intro_progress(start_time: int) -> float:
+    elapsed = (pygame.time.get_ticks() - start_time) / 1000.0
+    progress = min(1.0, elapsed / INTRO_DURATION)
+    return 1.0 - (1.0 - progress) ** 3
+
+
+def draw_intro_sprite(
+    surface: pygame.Surface,
+    sprite: pygame.sprite.Sprite,
+    alpha: float,
+    offset: tuple[int, int],
+) -> None:
+    image = sprite.image.copy()
+    image.set_alpha(round((image.get_alpha() or 255) * alpha))
+    surface.blit(image, sprite.rect.move(offset))
+
+
 def main() -> None:
     """Run the main Pygame application loop."""
     global gameState, track_start_time
@@ -205,6 +223,7 @@ def main() -> None:
         )
     ]
     drumstick : pygame.sprite.Group = Create_TransparentSource()
+    intro_start_time = pygame.time.get_ticks()
 
     register_collision_handlers(space, record_hit)
 
@@ -271,10 +290,16 @@ def main() -> None:
         # drawing goes here
 
         drums.update()
-        drums.draw(screen)
+        intro = intro_progress(intro_start_time)
+        drum_offset = (0, round((1.0 - intro) * 220))
+        for drum in drums:
+            draw_intro_sprite(screen, drum, intro, drum_offset)
 
         for button in drum_buttons:
-            button.draw(screen)
+            from_left = button.rect.centerx < SCREEN_SIZE[0] / 2
+            edge_offset = round((1.0 - intro) * 180)
+            button_offset = (-edge_offset if from_left else edge_offset, 0)
+            button.draw(screen, intro, button_offset)
 
         if gameState != gameStates.GameState.DRUMMOVE: # no stick while arranging drums
 
