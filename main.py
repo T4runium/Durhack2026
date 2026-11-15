@@ -11,9 +11,8 @@ from functions.CollisionHandler import register_collision_handlers
 from functions.DrumStick import CreateDrumStick , Create_TransparentSource , DrumStick
 from functions import SoundEngine
 from classes.button import Button
-
 import classes.AccuracyTracker as AccuracyTracker
-
+ 
 import pymunk.pygame_util
 
 from levels import Chp1
@@ -36,6 +35,19 @@ def nextState(next_state: gameStates.GameState) -> None:
     global gameState
     gameState = next_state
 
+def resetToDrumMove(drums: pygame.sprite.Group, drumstick: pygame.sprite.Group) -> None:
+    global gameState
+
+    for drum in drums:
+        space.remove(drum.body, drum.shape)
+    drums.empty()
+    drums.add(create_all(space))
+
+    drumstick.empty()
+
+    drumstick = Create_TransparentSource()
+
+    gameState = gameStates.GameState.DRUMMOVE
 
 def start_stick_move() -> None:
     global track_start_time
@@ -169,14 +181,22 @@ def main() -> None:
             lambda: create_kick(space, drums),
             5,
         ),
-        # Button(
-        #     "graphics/icons/ui/PlayIcon.png",
-        #     "graphics/icons/ui/PlayIconInverted.png",
-        #     1100,
-        #     700,
-        #     "",
-        #     lambda:
-        # )
+        Button(
+            "graphics/icons/ui/PlayIcon.png",
+            "graphics/icons/ui/PlayIconInverted.png",
+            1210,
+            650,
+            "",
+            lambda: start_stick_move(),
+        ),
+        Button(
+            "graphics/icons/ui/Restart.png",
+            "graphics/icons/ui/RestartInverted.png",
+            1200,
+            100,
+            "",
+            lambda: resetToDrumMove(drums, drumstick),
+        )
     ]
     drumstick : pygame.sprite.Group = Create_TransparentSource()
 
