@@ -160,6 +160,9 @@ def main() -> None:
     global gameState, track_start_time
 
     pygame.init()
+    pygame.mixer.music.load("sounds/mainmenu/DurhackMainMenu.mp3")
+    pygame.mixer.music.set_volume(0.15)
+    pygame.mixer.music.play(-1)
     screen: pygame.Surface = pygame.display.set_mode(SCREEN_SIZE, pygame.RESIZABLE)
     pygame.display.set_caption("Durhack2026")
     clock: pygame.time.Clock = pygame.time.Clock()
