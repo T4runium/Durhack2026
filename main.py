@@ -78,22 +78,23 @@ accuracy_score: float = 0.0
 accuracy_tracker: AccuracyTracker.AccuracyTracker | None = None
 
 def drag_drum(drums, active_drum: Drumkit, rel) -> None:
-    """Move the held drum by the mouse movement, unless that would overlap another drum."""
-    previous_position = active_drum.body.position
+    # previous_position = active_drum.body.position
     active_drum.body.position += rel
     space.reindex_shapes_for_body(active_drum.body)
 
-    overlapping_drum = any(
-        info.shape is drum.shape
-        for info in space.shape_query(active_drum.shape)
-        for drum in drums
-        if drum is not active_drum
-    )
-    if overlapping_drum:
-        active_drum.body.position = previous_position
-        space.reindex_shapes_for_body(active_drum.body)
-    else:
-        active_drum.rect.center = active_drum.body.position
+    # overlapping_drum = any(
+    #     info.shape is drum.shape
+    #     for info in space.shape_query(active_drum.shape)
+    #     for drum in drums
+    #     if drum is not active_drum
+    #     and drum.shape.collision_type != active_drum.shape.collision_type
+    #     and active_drum.dragged
+    # )
+    # if overlapping_drum:
+    #     active_drum.body.position = previous_position
+    #     space.reindex_shapes_for_body(active_drum.body)
+    # else:
+    active_drum.rect.center = active_drum.body.position
 
 
 def record_hit(instrument: int, impulse: float) -> None:
