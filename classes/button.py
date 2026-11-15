@@ -6,9 +6,14 @@ import pygame
 
 class Button:
     def __init__(self, image, hover_image, x_pos, y_pos, text, on_click: Callable[[], None], drum_type=None):
-        self.default_image = pygame.image.load(image).convert_alpha()
-        self.hover_image = pygame.image.load(hover_image).convert_alpha()
+        self.default_image = pygame.transform.scale_by(
+            pygame.image.load(image).convert_alpha(), 0.5
+        )
+        self.hover_image = pygame.transform.scale_by(
+            pygame.image.load(hover_image).convert_alpha(), 0.5
+        )
         self.image = self.default_image
+
         self.image.set_alpha(100)
         self.rect = self.image.get_rect(center=(x_pos, y_pos))
         self.text = text
@@ -24,11 +29,16 @@ class Button:
         )
         if clicked:
             self.on_click()
-    
-            instrument, label = _SOUND_BY_DRUM_TYPE[self.drum_type]
-            impulse = 1000
-            from functions.SoundEngine import play_sound_from_params
-            play_sound_from_params("drums1", instrument, impulse)
+
+            if self.drum_type != None:
+                instrument, label = _SOUND_BY_DRUM_TYPE[self.drum_type]
+                impulse = 1000
+                from functions.SoundEngine import play_sound_from_params
+                play_sound_from_params("drums1", instrument, impulse)
+
+            else:
+                from sounds.sound_effect_dict import sound_effects
+                sound_effects["ui",1].play()
 
         return clicked
 
