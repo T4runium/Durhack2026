@@ -55,7 +55,6 @@ class DrumStick(pygame.sprite.Sprite):
         self.rect = self.image.get_rect(center=((DrumStick_size)))
         self.shape.collision_type = 1
 
-
     def update(self):
         # Update the drumkit's position based on physics simulation
 
@@ -102,10 +101,9 @@ class DrumStickDisplay(pygame.sprite.Sprite):
 
 
 def Create_TransparentSource():
-    return pygame.sprite.Group( DrumStickDisplay() )    
+    return pygame.sprite.Group( DrumStickDisplay() )
 
 
-        
 
 
 # when it falls down the edge, you should be able to place the drumstick again
