@@ -6,9 +6,14 @@ import pygame
 
 class Button:
     def __init__(self, image, hover_image, x_pos, y_pos, text, on_click: Callable[[], None], drum_type=None):
-        self.default_image = pygame.image.load(image).convert_alpha()
-        self.hover_image = pygame.image.load(hover_image).convert_alpha()
+        self.default_image = pygame.transform.scale_by(
+            pygame.image.load(image).convert_alpha(), 0.5
+        )
+        self.hover_image = pygame.transform.scale_by(
+            pygame.image.load(hover_image).convert_alpha(), 0.5
+        )
         self.image = self.default_image
+
         self.image.set_alpha(100)
         self.rect = self.image.get_rect(center=(x_pos, y_pos))
         self.text = text

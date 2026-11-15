@@ -1,5 +1,12 @@
 import pygame, pymunk
-from functions.drums import Drumkit, create_all, create_cymbal
+from functions.drums import (
+    Drumkit,
+    create_all,
+    create_bass,
+    create_cymbal,
+    create_kick,
+    create_snare,
+)
 from functions.CollisionHandler import register_collision_handlers
 from functions.DrumStick import CreateDrumStick , Create_TransparentSource , DrumStick
 from functions import SoundEngine
@@ -105,15 +112,44 @@ def main() -> None:
 
     # Create instances here
     drums = create_all(space)
-    cymbal_button = Button(
-        "graphics/icons/drums1/CymbalIcon.png",
-        "graphics/icons/drums1/CymbalIconInverted.png",
-        100,
-        100,
-        "+",
-        lambda: create_cymbal(space, drums),
-        2
-    )
+    drum_buttons = [
+        Button(
+            "graphics/icons/drums1/CymbalIcon.png",
+            "graphics/icons/drums1/CymbalIconInverted.png",
+            100,
+            100,
+            "+",
+            lambda: create_cymbal(space, drums),
+            2,
+        ),
+        Button(
+            "graphics/icons/drums1/SnareIcon.png",
+            "graphics/icons/drums1/SnareInvertedIcon.png",
+            100,
+            200,
+            "+",
+            lambda: create_snare(space, drums),
+            3,
+        ),
+        Button(
+            "graphics/icons/drums1/DrumLargeIcon.png",
+            "graphics/icons/drums1/DrumLargeInvertedIcon.png",
+            100,
+            300,
+            "+",
+            lambda: create_bass(space, drums),
+            4,
+        ),
+        Button(
+            "graphics/icons/drums1/DrumKickIcon.png",
+            "graphics/icons/drums1/DrumKickInvertedIcon.png",
+            100,
+            400,
+            "+",
+            lambda: create_kick(space, drums),
+            5,
+        ),
+    ]
     drumstick : pygame.sprite.Group = Create_TransparentSource()
 
     register_collision_handlers(space, record_hit)
@@ -127,7 +163,8 @@ def main() -> None:
 
         for event in pygame.event.get():
 
-            cymbal_button.handle_event(event)
+            for button in drum_buttons:
+                button.handle_event(event)
 
             if event.type == pygame.QUIT:
 
@@ -188,7 +225,8 @@ def main() -> None:
         drums.update()
         drums.draw(screen)
 
-        cymbal_button.draw(screen)
+        for button in drum_buttons:
+            button.draw(screen)
 
         if gameState != gameStates.GameState.DRUMMOVE: # no stick while arranging drums
             drumstick.update()
