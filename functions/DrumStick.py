@@ -18,6 +18,8 @@ def Create_DrumStick(Space : pymunk.Space):
 
     shape = pymunk.Poly.create_box(body , DrumStick_size )
     shape.elasticity = 1
+
+    
     Space.add(body , shape)
 
     return shape

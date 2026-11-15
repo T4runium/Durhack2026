@@ -1,8 +1,7 @@
 import pygame, pymunk
 from functions.drums import Drumkit, create_drums
-from functions.CollisionHandler import on_hit as game_on_hit
+from functions.CollisionHandler import register_collision_handlers
 from functions.DrumStick import CreateDrumStick , Create_TransparentSource
-from functions.neural import neural
 import pymunk.pygame_util
 
 SCREEN_SIZE = (1280, 720)
@@ -15,67 +14,33 @@ FPS = 60
 
 space = pymunk.Space()
 space.gravity = (0, 750) # 500 pixels per second squared downward
+space.damping = 1
 
-# ---------- AI bandmate (call and response) ----------
-SoundEngine = neural.SoundEngine
-BPM = 120
-SPB = 60 / BPM                     # seconds per beat
-ROUND_BEATS = 8                    # player plays 2 bars, then the bandmate answers 2 bars
-DRUM_INSTRUMENT = {2: 1, 3: 7, 4: 5, 5: 6}   # drum collision type -> drums1 instrument (as CollisionHandler)
-
-
-def seconds() -> float:
-    return pygame.time.get_ticks() / 1000
-
-
-class Bandmate:
-    """Records the player's hits for a round, then plays the network's answer without blocking the loop."""
-
-    def __init__(self):
-        self.net = neural.load()
-        self.player_hits = []      # (beat, drum type, impulse)
-        self.queue = []            # answer notes still to play: (beat, SoundEvent)
-        self.round_start = seconds()
-        self.answer_start = None   # None while the player is playing
-
-    def on_hit(self, arbiter, space, data):
-        game_on_hit(arbiter, space, data)            # the game's own sound + print
-        if arbiter.is_first_contact and self.answer_start is None:
-            drum = next(s.collision_type for s in arbiter.shapes if s.collision_type != 1)
-            beat = (seconds() - self.round_start) / SPB
-            self.player_hits.append((beat, drum, arbiter.total_impulse.length))
-
-    def player_track(self):
-        events = [(beat, SoundEngine.SoundEvent("drums1", DRUM_INSTRUMENT[d], imp))
-                  for beat, d, imp in self.player_hits]
-        return SoundEngine.Track(name="Player", bpm=BPM, sound_events=events)
-
-    def update(self):
-        now = seconds()
-        if self.answer_start is None and now - self.round_start >= ROUND_BEATS * SPB:
-            player = self.player_track()
-            answer = neural.respond(self.net, player, n_bars=ROUND_BEATS // 4)
-            neural.show(player, ROUND_BEATS * neural.SUBDIV, "you played:")
-            neural.show(answer, ROUND_BEATS * neural.SUBDIV, "bandmate answers:")
-            if player.sound_events:
-                print(f"difficulty of your part (mean surprise): {neural.surprise(self.net, player).mean():.2f}")
-            self.queue = sorted(answer.sound_events, key=lambda e: e[0])
-            self.answer_start = now
-        if self.answer_start is not None:
-            while self.queue and self.queue[0][0] * SPB <= now - self.answer_start:
-                _, ev = self.queue.pop(0)
-                SoundEngine.play_sound_from_params(ev.type, ev.instrument, ev.velocity)
-            if now - self.answer_start >= ROUND_BEATS * SPB:   # answer finished: next round
-                self.player_hits.clear()
-                self.queue.clear()
-                self.round_start, self.answer_start = now, None
-
-gameState: gameStates.GameState = gameStates.GameState.STICKMOVE
+gameState: gameStates.GameState = gameStates.GameState.DRUMMOVE
 
 
 background = pygame.image.load('graphics/backgrounds/BG1.png')
 background = pygame.transform.scale(background , SCREEN_SIZE)
 
+
+
+def drag_drum(drums, active_drum: Drumkit, rel) -> None:
+    """Move the held drum by the mouse movement, unless that would overlap another drum."""
+    previous_position = active_drum.body.position
+    active_drum.body.position += rel
+    space.reindex_shapes_for_body(active_drum.body)
+
+    overlapping_drum = any(
+        info.shape is drum.shape
+        for info in space.shape_query(active_drum.shape)
+        for drum in drums
+        if drum is not active_drum
+    )
+    if overlapping_drum:
+        active_drum.body.position = previous_position
+        space.reindex_shapes_for_body(active_drum.body)
+    else:
+        active_drum.rect.center = active_drum.body.position
 
 
 def main() -> None:
@@ -91,19 +56,14 @@ def main() -> None:
     drums = create_drums(space)
     drumstick : pygame.sprite.Group = Create_TransparentSource()
 
-    bandmate = Bandmate()
+    register_collision_handlers(space)
 
-
-    for collision_type in range(2, 6):
-        space.on_collision(1, collision_type, post_solve=bandmate.on_hit)
-        
-    gameState = gameStates.GameState.STICKMOVE
+    # DRUMMOVE (drag drums, Enter/Space when done) -> STICKMOVE (click above y=300 to drop) -> STICKDROP
+    gameState = gameStates.GameState.DRUMMOVE
 
     active_drum: Drumkit | None = None
     running = True
     while running:
-
-        has_pressed = False
 
         for event in pygame.event.get():
 
@@ -116,38 +76,36 @@ def main() -> None:
                 # fights tiling compositors like niri and loops forever
                 screen = pygame.display.get_surface()
 
-            elif event.type == pygame.MOUSEBUTTONDOWN and event.button == 1:
-                active_drum = next( # sets active drum to most recent colliding drum
-                    (
-                        drum
-                        for drum in reversed(drums.sprites())
-                        if drum.rect.collidepoint(event.pos)
-                    ),
-                    None,
-                )
+            elif gameState == gameStates.GameState.DRUMMOVE:
 
-            elif event.type == pygame.MOUSEBUTTONUP and event.button == 1:
-                active_drum = None
+                if event.type == pygame.MOUSEBUTTONDOWN and event.button == 1:
+                    active_drum = next( # sets active drum to most recent colliding drum
+                        (
+                            drum
+                            for drum in reversed(drums.sprites())
+                            if drum.rect.collidepoint(event.pos)
+                        ),
+                        None,
+                    )
 
-            elif event.type == pygame.MOUSEMOTION and active_drum is not None:
-                previous_position = active_drum.body.position
-                active_drum.body.position += event.rel
-                space.reindex_shapes_for_body(active_drum.body)
+                elif event.type == pygame.MOUSEBUTTONUP and event.button == 1:
+                    active_drum = None
 
-                overlapping_drum = any(
-                    info.shape is drum.shape
-                    for info in space.shape_query(active_drum.shape)
-                    for drum in drums
-                    if drum is not active_drum
-                )
-                if overlapping_drum:
-                    active_drum.body.position = previous_position
-                    space.reindex_shapes_for_body(active_drum.body)
-                else:
-                    active_drum.rect.center = active_drum.body.position
+                elif event.type == pygame.MOUSEMOTION and active_drum is not None:
+                    drag_drum(drums, active_drum, event.rel)
 
+                elif event.type == pygame.KEYDOWN and event.key in (pygame.K_RETURN, pygame.K_SPACE):
+                    active_drum = None
+                    gameState = gameStates.GameState.STICKMOVE
 
-        bandmate.update()
+            elif gameState == gameStates.GameState.STICKMOVE:
+
+                if event.type == pygame.MOUSEBUTTONDOWN and event.button == 1 and IsValidPosition():
+                    drumstick.empty()
+
+                    drumstick = CreateDrumStick(space)
+                    gameState = gameStates.GameState.STICKDROP
+
 
         screen.blit(background , (0,0)) # replace with ui image when ready
 
@@ -156,43 +114,35 @@ def main() -> None:
         drums.update()
         drums.draw(screen)
 
-        drumstick.update()
-        drumstick.draw(screen)
+        if gameState != gameStates.GameState.DRUMMOVE: # no stick while arranging drums
+            drumstick.update()
+            drumstick.draw(screen)
 
         draw_options = pymunk.pygame_util.DrawOptions(screen)
-        # space.debug_draw(draw_options)
 
         pygame.display.flip()
 
         clock.tick(FPS)
+        
+        #MENU -> PLAYTRACK -> DRUMMOVE -> STICKMOVE -> STICKDROP -> POSTGAME
 
-        sub_steps = 10
-
-        for i in range(sub_steps):
-            space.step(1 / FPS / sub_steps) # update physics simulation
-            
         match gameState:
-            case gameStates.GameState.DRUMMOVE:
-                pass
             case gameStates.GameState.MENU:
                 pass
-            case gameStates.GameState.STICKDROP:
-                # end case, either time limit or jump limit
-                pass
+            case gameStates.GameState.DRUMMOVE:
+                pass 
             case gameStates.GameState.STICKMOVE:
-
-                if (pygame.mouse.get_pressed()[0] and IsValidPosition() ):
-                    drumstick.empty()
-
-                    drumstick = CreateDrumStick(space)
-                    gameState = gameStates.GameState.STICKDROP
+                pass 
+            case gameStates.GameState.STICKDROP:
                 
-            
+                sub_steps = 10
+
+                for i in range(sub_steps):
+                    space.step(1 / FPS / sub_steps) 
+
 
     pygame.quit()
 
 
 if __name__ == "__main__":
     main()
-
-
