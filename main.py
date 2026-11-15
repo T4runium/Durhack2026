@@ -248,6 +248,9 @@ def main() -> None:
             
                 gameState = gameStates.GameState.DRUMMOVE
                 drumstick.empty()
+
+                drumstick = Create_TransparentSource()
+
                        
         sub_steps = 10
 
