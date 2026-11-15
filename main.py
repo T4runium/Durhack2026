@@ -206,6 +206,7 @@ def main() -> None:
             case gameStates.GameState.STICKDROP:
                 
                 sub_steps = 10
+                #print(f"accuracy_score: {accuracy_score:.2f}%")
 
                 for i in range(sub_steps):
                     space.step(1 / FPS / sub_steps)
