@@ -123,12 +123,14 @@ def main() -> None:
         pygame.display.flip()
 
         clock.tick(FPS)
+        
+        #MENU -> PLAYTRACK -> DRUMMOVE -> STICKMOVE -> STICKDROP -> POSTGAME
 
         match gameState:
-            case gameStates.GameState.DRUMMOVE:
-                pass 
             case gameStates.GameState.MENU:
                 pass
+            case gameStates.GameState.DRUMMOVE:
+                pass 
             case gameStates.GameState.STICKMOVE:
                 pass 
             case gameStates.GameState.STICKDROP:
