@@ -60,9 +60,6 @@ def show(track, n_slots=None, title=None):
                       for t in range(len(grid)))
         print(f"  {names.get(inst, f'{stype} {inst}'):8s}{row}")
 
-
-# ---------- Hint: nudge the drums towards the solution ----------
-# Collision box size of each drum, keyed by collision type (copy of drums.py). Update if they change.
 HINT_DRUM_SIZES = {2: (223, 33), 3: (204, 70), 4: (202, 112), 5: (204, 70)}
 
 
