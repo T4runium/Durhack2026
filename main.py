@@ -255,6 +255,7 @@ def main() -> None:
                             j.GetRidOf()
             
                 gameState = gameStates.GameState.DRUMMOVE
+                print(accuracy_score)
                 drumstick.empty()
 
                 drumstick = Create_TransparentSource()
