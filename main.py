@@ -119,7 +119,7 @@ def main() -> None:
     register_collision_handlers(space, record_hit)
 
     # DRUMMOVE (drag drums, Enter/Space when done) -> STICKMOVE (click above y=300 to drop) -> STICKDROP
-    gameState = gameStates.GameState.DRUMMOVE
+    gameState = gameStates.GameState.STICKMOVE
 
     active_drum: Drumkit | None = None
     running = True
@@ -171,15 +171,11 @@ def main() -> None:
                     drumstick.empty()
 
                     drumstick = CreateDrumStick(space)
-                    gameState = gameStates.GameState.STICKDROP
-            elif gameState == gameStates.GameState.STICKDROP:
-                
-                if event.type == pygame.MOUSEBUTTONDOWN:
-                    for j in drumstick:
-                        if (isinstance(j,DrumStick)):
-                            if (j.rect.collidepoint(event.pos)):
-                                SoundEngine.play_sound_from_params("drums1", 8)
 
+                    
+                    gameState = gameStates.GameState.STICKDROP
+  
+                
 
         screen.blit(background , (0,0)) # replace with ui image when ready
 
@@ -205,13 +201,15 @@ def main() -> None:
         if (gameState == gameStates.GameState.STICKDROP):
                 for j in drumstick:
                     if (isinstance(j , DrumStick)):
-                        if (j.IsOutOfBounds(SCREEN_SIZE)):
-                            j.GetRidOf()
-            
-                gameState = gameStates.GameState.DRUMMOVE
-                drumstick.empty()
+                        if (not j.IsOutOfBounds((SCREEN_SIZE))):
+                            j.GetRidOf()            
 
-                drumstick = Create_TransparentSource()
+                            print(j.shape.body.position)
+                            
+                            gameState = gameStates.GameState.DRUMMOVE
+                            drumstick.empty()
+
+                            drumstick = Create_TransparentSource()
 
                        
         sub_steps = 10
