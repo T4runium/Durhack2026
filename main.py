@@ -30,7 +30,7 @@ space = pymunk.Space()
 space.gravity = (0, 750) # 500 pixels per second squared downward
 space.damping = 1
 
-gameState: gameStates.GameState = gameStates.GameState.DRUMMOVE
+gameState: gameStates.GameState = gameStates.GameState.STICKMOVE
 
 def nextState(next_state: gameStates.GameState) -> None:
     global gameState
@@ -183,7 +183,7 @@ def main() -> None:
     register_collision_handlers(space, record_hit)
 
     # DRUMMOVE (drag drums, Enter/Space when done) -> STICKMOVE (click above y=300 to drop) -> STICKDROP
-    gameState = gameStates.GameState.DRUMMOVE
+    gameState = gameStates.GameState.STICKMOVE
 
     active_drum: Drumkit | None = None
     running = True
@@ -252,6 +252,7 @@ def main() -> None:
             button.draw(screen)
 
         if gameState != gameStates.GameState.DRUMMOVE: # no stick while arranging drums
+
             drumstick.update()
             drumstick.draw(screen)
 
@@ -266,14 +267,18 @@ def main() -> None:
         if (gameState == gameStates.GameState.STICKDROP):
                 for j in drumstick:
                     if (isinstance(j , DrumStick)):
-                        if (j.IsOutOfBounds(SCREEN_SIZE)):
+                        if (not j.IsOutOfBounds(SCREEN_SIZE)):
                             j.GetRidOf()
             
-                gameState = gameStates.GameState.DRUMMOVE
-                print(accuracy_score)
-                drumstick.empty()
+                            gameState = gameStates.GameState.DRUMMOVE
+                            drumstick.empty()
+                            gameState = gameStates.GameState.DRUMMOVE
 
-                drumstick = Create_TransparentSource()
+                            drumstick.empty()
+
+                            drumstick = Create_TransparentSource()
+
+        print(accuracy_score)
 
                        
         sub_steps = 10
