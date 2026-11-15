@@ -23,7 +23,12 @@ gameState: gameStates.GameState = gameStates.GameState.DRUMMOVE
 background = pygame.image.load('graphics/backgrounds/BG1.png')
 background = pygame.transform.scale(background , SCREEN_SIZE)
 
-
+current_track: soundTypes.Track | None = None
+ongoing_track: soundTypes.Track = soundTypes.Track(
+    name="Ongoing Track",
+    bpm=120,
+    sound_events=[],
+)
 
 def drag_drum(drums, active_drum: Drumkit, rel) -> None:
     """Move the held drum by the mouse movement, unless that would overlap another drum."""
@@ -56,13 +61,6 @@ def main() -> None:
     # Create instances here
     drums = create_drums(space)
     drumstick : pygame.sprite.Group = Create_TransparentSource()
-    
-    current_track: soundTypes.Track | None = None
-    ongoing_track: soundTypes.Track = soundTypes.Track(
-        name="Ongoing Track",
-        bpm=120,
-        sound_events=[],
-    )
 
     register_collision_handlers(space)
 
