@@ -67,6 +67,8 @@ def main() -> None:
 
     active_drum: Drumkit | None = None
     running = True
+    time_run = 0
+
     while running:
 
         for event in pygame.event.get():
@@ -109,6 +111,14 @@ def main() -> None:
 
                     drumstick = CreateDrumStick(space)
                     gameState = gameStates.GameState.STICKDROP
+            elif gameState == gameStates.GameState.STICKDROP:
+                
+                if event.type == pygame.MOUSEBUTTONDOWN:
+                    for j in drumstick:
+                        if (isinstance(j,DrumStick)):
+                            if (j.rect.collidepoint(event.pos)):
+                                pass # add the sound effect
+                
 
 
         screen.blit(background , (0,0)) # replace with ui image when ready
@@ -118,9 +128,11 @@ def main() -> None:
         drums.update()
         drums.draw(screen)
 
-        if gameState != gameStates.GameState.DRUMMOVE: # no stick while arranging drums
+        if not gameState in (gameStates.GameState.DRUMMOVE , gameStates.GameState.MENU): # no stick while arranging drums
             drumstick.update()
             drumstick.draw(screen)
+
+
 
         draw_options = pymunk.pygame_util.DrawOptions(screen)
 
@@ -130,28 +142,19 @@ def main() -> None:
         
         #MENU -> PLAYTRACK -> DRUMMOVE -> STICKMOVE -> STICKDROP -> POSTGAME
 
-        match gameState:
-            case gameStates.GameState.MENU:
-                pass
-            case gameStates.GameState.DRUMMOVE:
-                pass 
-            case gameStates.GameState.STICKMOVE:
-                pass 
-            case gameStates.GameState.STICKDROP:
-
+        if (gameState == gameStates.GameState.STICKDROP):
                 for j in drumstick:
                     if (isinstance(j , DrumStick)):
                         if (j.IsOutOfBounds(SCREEN_SIZE)):
                             j.GetRidOf()
-                            gameState = gameStates.GameState.DRUMMOVE
-
+            
+                gameState = gameStates.GameState.DRUMMOVE
                 drumstick.empty()
+                       
+        sub_steps = 10
 
-                
-                sub_steps = 10
-
-                for i in range(sub_steps):
-                    space.step(1 / FPS / sub_steps) 
+        for i in range(sub_steps):
+            space.step(1 / FPS / sub_steps) 
 
 
     pygame.quit()
