@@ -1,7 +1,8 @@
 import pygame, pymunk
 from functions.drums import Drumkit, create_all, create_cymbal
 from functions.CollisionHandler import register_collision_handlers
-from functions.DrumStick import CreateDrumStick , Create_TransparentSource
+from functions.DrumStick import CreateDrumStick , Create_TransparentSource , DrumStick
+from functions import SoundEngine
 from classes.button import Button
 import levels.Chp1 as Chp1
 import classes.AccuracyTracker as AccuracyTracker
@@ -21,7 +22,6 @@ space.gravity = (0, 750) # 500 pixels per second squared downward
 space.damping = 1
 
 gameState: gameStates.GameState = gameStates.GameState.DRUMMOVE
-
 
 background = pygame.image.load('graphics/backgrounds/BG1.png')
 background = pygame.transform.scale(background , SCREEN_SIZE)
@@ -173,6 +173,13 @@ def main() -> None:
 
                     drumstick = CreateDrumStick(space)
                     gameState = gameStates.GameState.STICKDROP
+            elif gameState == gameStates.GameState.STICKDROP:
+                
+                if event.type == pygame.MOUSEBUTTONDOWN:
+                    for j in drumstick:
+                        if (isinstance(j,DrumStick)):
+                            if (j.rect.collidepoint(event.pos)):
+                                SoundEngine.play_sound_from_params("drums1", 8)
 
 
         screen.blit(background , (0,0)) # replace with ui image when ready
@@ -196,20 +203,19 @@ def main() -> None:
         
         #MENU -> PLAYTRACK -> DRUMMOVE -> STICKMOVE -> STICKDROP -> POSTGAME
 
-        match gameState:
-            case gameStates.GameState.MENU:
-                pass
-            case gameStates.GameState.DRUMMOVE:
-                pass 
-            case gameStates.GameState.STICKMOVE:
-                pass 
-            case gameStates.GameState.STICKDROP:
-                
-                sub_steps = 10
-                #print(f"accuracy_score: {accuracy_score:.2f}%")
+        if (gameState == gameStates.GameState.STICKDROP):
+                for j in drumstick:
+                    if (isinstance(j , DrumStick)):
+                        if (j.IsOutOfBounds(SCREEN_SIZE)):
+                            j.GetRidOf()
+            
+                gameState = gameStates.GameState.DRUMMOVE
+                drumstick.empty()
+                       
+        sub_steps = 10
 
-                for i in range(sub_steps):
-                    space.step(1 / FPS / sub_steps)
+        for i in range(sub_steps):
+            space.step(1 / FPS / sub_steps) 
 
 
     pygame.quit()
