@@ -75,7 +75,7 @@ KICK_PATTERNS = [[0, 8], [0, 10], [0, 6, 8], [0, 7, 10], [0, 8, 10], [0, 3, 8, 1
 
 def make_groove(n_bars=8):
     """A random but musical drum groove: hats, kick pattern, backbeat snare, fills and crashes."""
-    grid = np.zeros((n_bars * BAR, N_INST))n
+    grid = np.zeros((n_bars * BAR, N_INST))
     hat = HIHAT if np.random.rand() < 0.8 else CYMBAL
     hat_step = np.random.choice([4, 2, 1], p=[0.2, 0.6, 0.2])
     kick = KICK_PATTERNS[np.random.randint(len(KICK_PATTERNS))]
