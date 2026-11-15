@@ -4,8 +4,10 @@ import pygame
 
 
 class Button:
-    def __init__(self, image, x_pos, y_pos, text, on_click: Callable[[], None]):
-        self.image = pygame.image.load(image).convert_alpha()
+    def __init__(self, image, hover_image, x_pos, y_pos, text, on_click: Callable[[], None]):
+        self.default_image = pygame.image.load(image).convert_alpha()
+        self.hover_image = pygame.image.load(hover_image).convert_alpha()
+        self.image = self.default_image
         self.image.set_alpha(100)
         self.rect = self.image.get_rect(center=(x_pos, y_pos))
         self.text = text
@@ -25,6 +27,7 @@ class Button:
     def draw(self, surface):
         surface.blit(self.image, self.rect)
         color = "green" if self.rect.collidepoint(pygame.mouse.get_pos()) else "white"
+        self.image = self.hover_image if self.rect.collidepoint(pygame.mouse.get_pos()) else self.default_image
         rendered_text = self.font.render(self.text, True, color)
         text_rect = rendered_text.get_rect(center=self.rect.center)
         surface.blit(rendered_text, text_rect)

@@ -9,18 +9,12 @@ os.chdir(PROJECT_ROOT)
 
 import SoundEngine
 
-# Puzzle helpers: beat-grid tools, hints that nudge the drums towards the solution,
-# and a similarity score between the solution track and what the player played.
-
-
-# ---------- Beat grid ----------
-SUBDIV = 4                      # slots per beat (quarter beats)
-BAR = 4 * SUBDIV                # slots per 4/4 bar
+SUBDIV = 4                      
+BAR = 4 * SUBDIV                
 INSTRUMENTS = [(stype, inst) for stype in SoundEngine.sound_effects
                for inst in SoundEngine.sound_effects[stype]]
 N_INST = len(INSTRUMENTS)
 
-# drums1 instrument numbers (see sounds/sound_effect_dict.py)
 CYMBAL, HIHAT, TOM_HI, TOM_MID, TOM_LO, KICK, SNARE = 1, 2, 3, 4, 5, 6, 7
 
 
@@ -66,9 +60,7 @@ def show(track, n_slots=None, title=None):
         print(f"  {names.get(inst, f'{stype} {inst}'):8s}{row}")
 
 
-# ---------- Hint: nudge the drums towards the solution ----------
-# Collision box size of each drum, keyed by collision type (copy of drums.py). Update if they change.
-HINT_DRUM_SIZES = {2: (223, 33), 3: (204, 70), 4: (202, 112), 5: (204, 70)}
+
 
 
 def _boxes_overlap(pos_a, size_a, pos_b, size_b):
@@ -78,17 +70,6 @@ def _boxes_overlap(pos_a, size_a, pos_b, size_b):
 
 
 def hint_move(current, solution, amount=0.25, sizes=None, snap=2.0):
-    """Move each drum `amount` of the way from where it is now towards where it is in the solution.
-
-    current, solution: {collision type: (x, y)}, e.g.
-        {d.shape.collision_type: tuple(d.body.position) for d in drums}
-    amount: 0 = no help, 1 = straight onto the solution, 0.25 = a quarter of the remaining distance.
-    sizes: {collision type: (w, h)} for the overlap check (defaults to HINT_DRUM_SIZES).
-    snap: drums closer than this many pixels to their target are put exactly on it.
-
-    Returns new positions in the same form. Drums that are furthest away move first, and a step
-    that would overlap another drum is halved until it fits (or skipped), like dragging in main.py.
-    """
     if not 0 <= amount <= 1:
         raise ValueError("amount must be between 0 and 1")
     sizes = HINT_DRUM_SIZES if sizes is None else sizes
@@ -102,7 +83,7 @@ def hint_move(current, solution, amount=0.25, sizes=None, snap=2.0):
     for k in sorted(set(current) & set(solution), key=distance, reverse=True):
         start, goal = np.array(new[k]), np.array(solution[k], dtype=float)
         step = amount if np.linalg.norm(goal - start) * (1 - amount) > snap else 1.0
-        for _ in range(8):                      # halve the step until it doesn't overlap anything
+        for i in range(8):                      # halve the step until it doesn't overlap anything
             pos = start + step * (goal - start)
             blocked = k in sizes and any(
                 _boxes_overlap(pos, sizes[k], new[o], sizes[o])
@@ -115,30 +96,18 @@ def hint_move(current, solution, amount=0.25, sizes=None, snap=2.0):
 
 
 def hint_progress(current, solution):
-    """Average distance in pixels between the drums and their solution positions (0 = solved)."""
-    keys = set(current) & set(solution)
     if not keys:
         return 0.0
     return float(np.mean([np.hypot(solution[k][0] - current[k][0], solution[k][1] - current[k][1])
                           for k in keys]))
 
 
-# ---------- Similarity: how close the played track is to the solution ----------
 def similarity(solution, played, window=0.15, align_start=True):
-    """Similarity between the solution Track and the played Track, as a percentage (0-100).
-
-    Each played hit is paired with at most one solution hit on the same instrument, closest pairs
-    first. A pair scores 1 when the times are equal, falling to 0 at `window` seconds apart.
-    Missed notes and extra hits both count against you (it is an F1 score with partial credit):
-        100 * 2 * sum(pair scores) / (solution notes + played hits)
-    align_start: shift the played track so its first hit lines up with the solution's first note,
-    so it doesn't matter exactly when the recording started.
-    """
     sol = sorted(solution.sound_events, key=lambda e: e[0])
     ply = sorted(played.sound_events, key=lambda e: e[0])
     if not sol and not ply:
         return 100.0
-    if not sol or not ply:
+    elif not sol or not ply:
         return 0.0
 
     spb_sol, spb_ply = 60.0 / solution.bpm, 60.0 / played.bpm

@@ -1,9 +1,13 @@
 import pygame, pymunk
-from functions.drums import Drumkit, create_all
+from functions.drums import Drumkit, create_all, create_cymbal
 from functions.CollisionHandler import register_collision_handlers
 from functions.DrumStick import CreateDrumStick , Create_TransparentSource
+<<<<<<< HEAD
+from classes.button import Button
+=======
 import levels.Chp1 as Chp1
 import classes.AccuracyTracker as AccuracyTracker
+>>>>>>> 7f5c6a51a23c4988496dd341826c6a99911d513c
 
 import pymunk.pygame_util
 
@@ -106,6 +110,14 @@ def main() -> None:
 
     # Create instances here
     drums = create_all(space)
+    cymbal_button = Button(
+        "graphics/icons/drums1/CymbalIcon.png",
+        "graphics/icons/drums1/CymbalIconInverted.png",
+        100,
+        100,
+        "+",
+        lambda: create_cymbal(space, drums),
+    )
     drumstick : pygame.sprite.Group = Create_TransparentSource()
 
     register_collision_handlers(space, record_hit)
@@ -118,6 +130,8 @@ def main() -> None:
     while running:
 
         for event in pygame.event.get():
+
+            cymbal_button.handle_event(event)
 
             if event.type == pygame.QUIT:
 
@@ -170,6 +184,8 @@ def main() -> None:
 
         drums.update()
         drums.draw(screen)
+
+        cymbal_button.draw(screen)
 
         if gameState != gameStates.GameState.DRUMMOVE: # no stick while arranging drums
             drumstick.update()
