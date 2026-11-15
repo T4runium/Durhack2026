@@ -2,7 +2,12 @@ import pygame, pymunk
 from functions.drums import Drumkit, create_all, create_cymbal
 from functions.CollisionHandler import register_collision_handlers
 from functions.DrumStick import CreateDrumStick , Create_TransparentSource
+<<<<<<< HEAD
 from classes.button import Button
+=======
+import levels.Chp1 as Chp1
+import classes.AccuracyTracker as AccuracyTracker
+>>>>>>> 7f5c6a51a23c4988496dd341826c6a99911d513c
 
 import pymunk.pygame_util
 
@@ -31,6 +36,10 @@ ongoing_track: soundTypes.Track = soundTypes.Track(
     sound_events=[],
 )
 
+track_start_time: float = 0
+accuracy_score: float = 0.0
+accuracy_tracker: AccuracyTracker.AccuracyTracker | None = None
+
 def drag_drum(drums, active_drum: Drumkit, rel) -> None:
     """Move the held drum by the mouse movement, unless that would overlap another drum."""
     previous_position = active_drum.body.position
@@ -50,8 +59,48 @@ def drag_drum(drums, active_drum: Drumkit, rel) -> None:
         active_drum.rect.center = active_drum.body.position
 
 
+def record_hit(instrument: int, impulse: float) -> None:
+    global accuracy_score
+
+    beat = (
+        (pygame.time.get_ticks() / 1000.0 - track_start_time)
+        * ongoing_track.bpm
+        / 60.0
+    )
+
+    ongoing_track.sound_events.append(
+        (
+            beat,
+            soundTypes.SoundEvent(
+                type="drums1",
+                instrument=instrument,
+                velocity=impulse,
+            ),
+        )
+    )
+
+    if accuracy_tracker is not None:
+        accuracy_tracker.register_hit(beat, instrument, impulse)
+        accuracy_score = accuracy_tracker.accuracy_percent
+    
+def set_current_track_from_index(chapter: int, index: int) -> None:
+    global current_track, ongoing_track, accuracy_tracker
+    
+    current_track = Chp1.levels[index]
+    ongoing_track = soundTypes.Track(
+        name="Ongoing Track",
+        bpm=current_track.bpm,
+        sound_events=[],
+    )
+    accuracy_tracker = AccuracyTracker.AccuracyTracker(
+        current_track,
+        current_track.bpm,
+    )
+
 def main() -> None:
     """Run the main Pygame application loop."""
+    global track_start_time
+
     pygame.init()
     screen: pygame.Surface = pygame.display.set_mode(SCREEN_SIZE, pygame.RESIZABLE)
     pygame.display.set_caption("Durhack2026")
@@ -71,7 +120,7 @@ def main() -> None:
     )
     drumstick : pygame.sprite.Group = Create_TransparentSource()
 
-    register_collision_handlers(space)
+    register_collision_handlers(space, record_hit)
 
     # DRUMMOVE (drag drums, Enter/Space when done) -> STICKMOVE (click above y=300 to drop) -> STICKDROP
     gameState = gameStates.GameState.DRUMMOVE
@@ -122,6 +171,7 @@ def main() -> None:
 
                     drumstick = CreateDrumStick(space)
                     gameState = gameStates.GameState.STICKDROP
+                    track_start_time = pygame.time.get_ticks() / 1000.0  # Record the start time of the track
 
 
         screen.blit(background , (0,0)) # replace with ui image when ready
@@ -157,7 +207,7 @@ def main() -> None:
                 sub_steps = 10
 
                 for i in range(sub_steps):
-                    space.step(1 / FPS / sub_steps) 
+                    space.step(1 / FPS / sub_steps)
 
 
     pygame.quit()
