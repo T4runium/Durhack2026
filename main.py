@@ -1,5 +1,5 @@
 import pygame, pymunk
-from functions.drums import Drumkit, create_drums
+from functions.drums import Drumkit, create_all
 from functions.CollisionHandler import register_collision_handlers
 from functions.DrumStick import CreateDrumStick , Create_TransparentSource
 import levels.Chp1 as Chp1
@@ -105,7 +105,7 @@ def main() -> None:
 
 
     # Create instances here
-    drums = create_drums(space)
+    drums = create_all(space)
     drumstick : pygame.sprite.Group = Create_TransparentSource()
 
     register_collision_handlers(space, record_hit)
