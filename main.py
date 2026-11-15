@@ -43,12 +43,9 @@ def resetToDrumMove(drums: pygame.sprite.Group, drumstick: pygame.sprite.Group) 
     drums.empty()
     drums.add(create_all(space))
 
-    for stick in drumstick:
-        if isinstance(stick, DrumStick):
-            stick.GetRidOf()
-
     drumstick.empty()
-    drumstick.add(*Create_TransparentSource().sprites())
+
+    drumstick = Create_TransparentSource()
 
     gameState = gameStates.GameState.DRUMMOVE
 
@@ -302,7 +299,7 @@ def main() -> None:
 
         sub_steps = 10
 
-        for i in range(sub_steps):
+        for _ in range(sub_steps):
             space.step(1 / FPS / sub_steps) 
 
 
