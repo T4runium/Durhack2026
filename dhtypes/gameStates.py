@@ -8,3 +8,5 @@ class GameState(Enum):
     STICKMOVE = 4
     POSTGAME = 5
     PLAYTRACK = 6
+    INTERVAL = 7
+    
