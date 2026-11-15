@@ -1,10 +1,11 @@
 from collections.abc import Callable
+from functions.soundDictionary import _SOUND_BY_DRUM_TYPE
 
 import pygame
 
 
 class Button:
-    def __init__(self, image, hover_image, x_pos, y_pos, text, on_click: Callable[[], None]):
+    def __init__(self, image, hover_image, x_pos, y_pos, text, on_click: Callable[[], None], drum_type=None):
         self.default_image = pygame.image.load(image).convert_alpha()
         self.hover_image = pygame.image.load(hover_image).convert_alpha()
         self.image = self.default_image
@@ -13,6 +14,7 @@ class Button:
         self.text = text
         self.font = pygame.font.Font(None, 32)
         self.on_click = on_click
+        self.drum_type = drum_type
 
     def handle_event(self, event) -> bool:
         clicked = (
@@ -22,6 +24,12 @@ class Button:
         )
         if clicked:
             self.on_click()
+    
+            instrument, label = _SOUND_BY_DRUM_TYPE[self.drum_type]
+            impulse = 1000
+            from functions.SoundEngine import play_sound_from_params
+            play_sound_from_params("drums1", instrument, impulse)
+
         return clicked
 
     def draw(self, surface):

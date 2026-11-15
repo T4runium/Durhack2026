@@ -3,11 +3,6 @@ from functions.drums import Drumkit, create_all, create_cymbal
 from functions.CollisionHandler import register_collision_handlers
 from functions.DrumStick import CreateDrumStick , Create_TransparentSource
 from classes.button import Button
-<<<<<<< HEAD
-=======
-import levels.Chp1 as Chp1
-import classes.AccuracyTracker as AccuracyTracker
->>>>>>> 16ef03e0385e5828373d497085cc84e9bd22f6e2
 
 import pymunk.pygame_util
 
@@ -37,7 +32,7 @@ ongoing_track: soundTypes.Track = soundTypes.Track(
 
 track_start_time: float = 0
 accuracy_score: float = 0.0
-accuracy_tracker: AccuracyTracker.AccuracyTracker | None = None
+# accuracy_tracker: AccuracyTracker.AccuracyTracker | None = None
 
 def drag_drum(drums, active_drum: Drumkit, rel) -> None:
     """Move the held drum by the mouse movement, unless that would overlap another drum."""
@@ -116,6 +111,7 @@ def main() -> None:
         100,
         "+",
         lambda: create_cymbal(space, drums),
+        2
     )
     drumstick : pygame.sprite.Group = Create_TransparentSource()
 
