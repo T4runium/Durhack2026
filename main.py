@@ -58,7 +58,11 @@ def main() -> None:
     drumstick : pygame.sprite.Group = Create_TransparentSource()
     
     current_track: soundTypes.Track | None = None
-    ongoing_track: soundTypes.Track | None = None
+    ongoing_track: soundTypes.Track = soundTypes.Track(
+        name="Ongoing Track",
+        bpm=120,
+        sound_events=[],
+    )
 
     register_collision_handlers(space)
 
