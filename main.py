@@ -2,12 +2,9 @@ import pygame, pymunk
 from functions.drums import Drumkit, create_all, create_cymbal
 from functions.CollisionHandler import register_collision_handlers
 from functions.DrumStick import CreateDrumStick , Create_TransparentSource
-<<<<<<< HEAD
 from classes.button import Button
-=======
 import levels.Chp1 as Chp1
 import classes.AccuracyTracker as AccuracyTracker
->>>>>>> 7f5c6a51a23c4988496dd341826c6a99911d513c
 
 import pymunk.pygame_util
 
