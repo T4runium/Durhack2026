@@ -41,19 +41,10 @@ class Button:
     
         return clicked
 
-    def draw(
-        self,
-        surface: pygame.Surface,
-        alpha: float = 1.0,
-        offset: tuple[int, int] = (0, 0),
-    ) -> None:
+    def draw(self, surface):
+        surface.blit(self.image, self.rect)
         color = "green" if self.rect.collidepoint(pygame.mouse.get_pos()) else "white"
         self.image = self.hover_image if self.rect.collidepoint(pygame.mouse.get_pos()) else self.default_image
-        image = self.image.copy()
-        image.set_alpha(round((image.get_alpha() or 255) * alpha))
-        draw_rect = self.rect.move(offset)
-        surface.blit(image, draw_rect)
         rendered_text = self.font.render(self.text, True, color)
-        rendered_text.set_alpha(round(255 * alpha))
-        text_rect = rendered_text.get_rect(center=draw_rect.center)
+        text_rect = rendered_text.get_rect(center=self.rect.center)
         surface.blit(rendered_text, text_rect)
