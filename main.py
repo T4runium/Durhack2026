@@ -22,7 +22,6 @@ space.damping = 1
 
 gameState: gameStates.GameState = gameStates.GameState.DRUMMOVE
 
-
 background = pygame.image.load('graphics/backgrounds/BG1.png')
 background = pygame.transform.scale(background , SCREEN_SIZE)
 
