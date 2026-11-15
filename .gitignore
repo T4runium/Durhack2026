@@ -3,5 +3,8 @@ __pycache__/
 *.pyo
 *.pyd
 .vscode/
+build/
+dist/
+Durhack2026.spec
 *:Zone.Identifier
 
