@@ -104,6 +104,16 @@ def play_sound_from_track(track: Track, metronome: bool = False) -> None:
 
     while pygame.mixer.get_busy():
         clock.tick(60)
+        
+def play_sound_from_track_async(track: Track, metronome: bool = False) -> None:
+    """Play a track in beat order asynchronously, optionally playing a click on each beat."""
+    import threading
+
+    def play_track():
+        play_sound_from_track(track, metronome)
+
+    thread = threading.Thread(target=play_track)
+    thread.start()
 
     
 def get_nparray_from_track(

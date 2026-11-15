@@ -243,7 +243,6 @@ def main() -> None:
 
                 elif event.type == pygame.KEYDOWN and event.key in (pygame.K_RETURN, pygame.K_SPACE):
                     active_drum = None
-                    start_stick_move()
 
             elif gameState == gameStates.GameState.STICKMOVE:
 
