@@ -22,7 +22,7 @@ def Create_DrumStick(Space : pymunk.Space):
     
     Space.add(body , shape)
 
-    return shape
+    return shape,body
 
 
 def CreateBorder(space : pymunk.Space ,start : tuple , end : tuple):
@@ -46,7 +46,7 @@ class DrumStick(pygame.sprite.Sprite):
 
         super().__init__()
         
-        self.shape = Create_DrumStick(space)
+        self.shape , self.body = Create_DrumStick(space)
         self.space = space
         
         self.image = pygame.image.load("graphics/drumstick.png").convert_alpha()
@@ -64,7 +64,15 @@ class DrumStick(pygame.sprite.Sprite):
         self.image = pygame.transform.rotate(self.originalimage ,-math.degrees(self.shape.body.angle) )
         self.rect = self.image.get_rect(center = self.rect.center)
 
-    
+    def IsOutOfBounds(self,SCREENSIZE : tuple):
+        return self.OutOfBounds1Var(self.shape.body.position.x , SCREENSIZE[0] , 0) and self.OutOfBounds1Var(self.shape.body.position.y , SCREENSIZE[1] , 0)
+
+    def OutOfBounds1Var(self,x,xmax,xmin):
+        return x < xmax and x > xmin 
+
+    def GetRidOf(self):
+        self.space.remove(self.body , self.shape)
+        
 
 def CreateDrumStick(Space : pymunk.Space):
     return pygame.sprite.Group( DrumStick(Space) )  

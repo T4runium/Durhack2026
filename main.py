@@ -1,7 +1,7 @@
 import pygame, pymunk
 from functions.drums import Drumkit, create_drums
 from functions.CollisionHandler import register_collision_handlers
-from functions.DrumStick import CreateDrumStick , Create_TransparentSource
+from functions.DrumStick import CreateDrumStick , Create_TransparentSource , DrumStick
 
 import pymunk.pygame_util
 
@@ -138,6 +138,15 @@ def main() -> None:
             case gameStates.GameState.STICKMOVE:
                 pass 
             case gameStates.GameState.STICKDROP:
+
+                for j in drumstick:
+                    if (isinstance(j , DrumStick)):
+                        if (j.IsOutOfBounds(SCREEN_SIZE)):
+                            j.GetRidOf()
+                            gameState = gameStates.GameState.DRUMMOVE
+
+                drumstick.empty()
+
                 
                 sub_steps = 10
 
