@@ -149,6 +149,14 @@ def main() -> None:
             lambda: create_kick(space, drums),
             5,
         ),
+        # Button(
+        #     "graphics/icons/ui/PlayIcon.png",
+        #     "graphics/icons/ui/PlayIconInverted.png",
+        #     1100,
+        #     700,
+        #     "",
+        #     lamba:
+        # )
     ]
     drumstick : pygame.sprite.Group = Create_TransparentSource()
 
