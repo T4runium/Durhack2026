@@ -4,11 +4,6 @@ from functions.CollisionHandler import register_collision_handlers
 from functions.DrumStick import CreateDrumStick , Create_TransparentSource , DrumStick
 from functions import SoundEngine
 from classes.button import Button
-<<<<<<< HEAD
-=======
-import levels.Chp1 as Chp1
-import classes.AccuracyTracker as AccuracyTracker
->>>>>>> 2bae4641adc70339ca95534d0c7d6aff8427c926
 
 import pymunk.pygame_util
 
