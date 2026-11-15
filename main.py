@@ -12,7 +12,11 @@ from functions.DrumStick import CreateDrumStick , Create_TransparentSource , Dru
 from functions import SoundEngine
 from classes.button import Button
 
+import classes.AccuracyTracker as AccuracyTracker
+
 import pymunk.pygame_util
+
+from levels import Chp1
 
 SCREEN_SIZE = (1280, 720)
 from dhtypes import gameStates, soundTypes
@@ -44,7 +48,7 @@ ongoing_track: soundTypes.Track = soundTypes.Track(
 
 track_start_time: float = 0
 accuracy_score: float = 0.0
-# accuracy_tracker: AccuracyTracker.AccuracyTracker | None = None
+accuracy_tracker: AccuracyTracker.AccuracyTracker | None = None
 
 def drag_drum(drums, active_drum: Drumkit, rel) -> None:
     """Move the held drum by the mouse movement, unless that would overlap another drum."""
@@ -153,21 +157,13 @@ def main() -> None:
             lambda: create_kick(space, drums),
             5,
         ),
-        # Button(
-        #     "graphics/icons/ui/PlayIcon.png",
-        #     "graphics/icons/ui/PlayIconInverted.png",
-        #     1100,
-        #     700,
-        #     "",
-        #     lamba:
-        # )
     ]
     drumstick : pygame.sprite.Group = Create_TransparentSource()
 
     register_collision_handlers(space, record_hit)
 
     # DRUMMOVE (drag drums, Enter/Space when done) -> STICKMOVE (click above y=300 to drop) -> STICKDROP
-    gameState = gameStates.GameState.STICKMOVE
+    gameState = gameStates.GameState.DRUMMOVE
 
     active_drum: Drumkit | None = None
     running = True
@@ -220,11 +216,15 @@ def main() -> None:
                     drumstick.empty()
 
                     drumstick = CreateDrumStick(space)
-
-                    
                     gameState = gameStates.GameState.STICKDROP
-  
+            elif gameState == gameStates.GameState.STICKDROP:
                 
+                if event.type == pygame.MOUSEBUTTONDOWN:
+                    for j in drumstick:
+                        if (isinstance(j,DrumStick)):
+                            if (j.rect.collidepoint(event.pos)):
+                                SoundEngine.play_sound_from_params("drums1", 8)
+
 
         screen.blit(background , (0,0)) # replace with ui image when ready
 
@@ -251,15 +251,13 @@ def main() -> None:
         if (gameState == gameStates.GameState.STICKDROP):
                 for j in drumstick:
                     if (isinstance(j , DrumStick)):
-                        if (not j.IsOutOfBounds((SCREEN_SIZE))):
-                            j.GetRidOf()            
+                        if (j.IsOutOfBounds(SCREEN_SIZE)):
+                            j.GetRidOf()
+            
+                gameState = gameStates.GameState.DRUMMOVE
+                drumstick.empty()
 
-                            print(j.shape.body.position)
-                            
-                            gameState = gameStates.GameState.DRUMMOVE
-                            drumstick.empty()
-
-                            drumstick = Create_TransparentSource()
+                drumstick = Create_TransparentSource()
 
                        
         sub_steps = 10
