@@ -36,18 +36,6 @@ def nextState(next_state: gameStates.GameState) -> None:
     global gameState
     gameState = next_state
 
-
-def start_stick_move() -> None:
-    global track_start_time
-
-    if gameState != gameStates.GameState.DRUMMOVE:
-        return
-
-    stick_move_start_time = pygame.time.get_ticks() / 1000.0
-    track_start_time = stick_move_start_time + 4 * 60.0 / ongoing_track.bpm
-    nextState(gameStates.GameState.STICKMOVE)
-
-
 background = pygame.image.load('graphics/backgrounds/BG1.png')
 background = pygame.transform.scale(background , SCREEN_SIZE)
 
@@ -223,7 +211,6 @@ def main() -> None:
 
                 elif event.type == pygame.KEYDOWN and event.key in (pygame.K_RETURN, pygame.K_SPACE):
                     active_drum = None
-                    start_stick_move()
 
             elif gameState == gameStates.GameState.STICKMOVE:
 
