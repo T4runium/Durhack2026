@@ -175,7 +175,7 @@ def main() -> None:
         #     1100,
         #     700,
         #     "",
-        #     lamba:
+        #     lambda:
         # )
     ]
     drumstick : pygame.sprite.Group = Create_TransparentSource()
