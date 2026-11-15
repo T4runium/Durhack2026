@@ -36,6 +36,18 @@ def nextState(next_state: gameStates.GameState) -> None:
     global gameState
     gameState = next_state
 
+
+def start_stick_move() -> None:
+    global track_start_time
+
+    if gameState != gameStates.GameState.DRUMMOVE:
+        return
+
+    stick_move_start_time = pygame.time.get_ticks() / 1000.0
+    track_start_time = stick_move_start_time + 4 * 60.0 / ongoing_track.bpm
+    nextState(gameStates.GameState.STICKMOVE)
+
+
 background = pygame.image.load('graphics/backgrounds/BG1.png')
 background = pygame.transform.scale(background , SCREEN_SIZE)
 
@@ -109,7 +121,7 @@ def set_current_track_from_index(chapter: int, index: int) -> None:
 
 def main() -> None:
     """Run the main Pygame application loop."""
-    global track_start_time
+    global gameState, track_start_time
 
     pygame.init()
     screen: pygame.Surface = pygame.display.set_mode(SCREEN_SIZE, pygame.RESIZABLE)
@@ -157,6 +169,14 @@ def main() -> None:
             lambda: create_kick(space, drums),
             5,
         ),
+        # Button(
+        #     "graphics/icons/ui/PlayIcon.png",
+        #     "graphics/icons/ui/PlayIconInverted.png",
+        #     1100,
+        #     700,
+        #     "",
+        #     lamba:
+        # )
     ]
     drumstick : pygame.sprite.Group = Create_TransparentSource()
 
@@ -203,12 +223,7 @@ def main() -> None:
 
                 elif event.type == pygame.KEYDOWN and event.key in (pygame.K_RETURN, pygame.K_SPACE):
                     active_drum = None
-                    stick_move_start_time = pygame.time.get_ticks() / 1000.0
-                    track_start_time = (
-                        stick_move_start_time
-                        + 4 * 60.0 / ongoing_track.bpm
-                    )
-                    gameState = gameStates.GameState.STICKMOVE
+                    start_stick_move()
 
             elif gameState == gameStates.GameState.STICKMOVE:
 
@@ -257,8 +272,13 @@ def main() -> None:
             
                             gameState = gameStates.GameState.DRUMMOVE
                             drumstick.empty()
+                            gameState = gameStates.GameState.DRUMMOVE
+
+                            drumstick.empty()
 
                             drumstick = Create_TransparentSource()
+
+        print(accuracy_score)
 
                        
         sub_steps = 10
