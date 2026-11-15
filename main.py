@@ -12,7 +12,11 @@ from functions.DrumStick import CreateDrumStick , Create_TransparentSource , Dru
 from functions import SoundEngine
 from classes.button import Button
 
+import classes.AccuracyTracker as AccuracyTracker
+
 import pymunk.pygame_util
+
+from levels import Chp1
 
 SCREEN_SIZE = (1280, 720)
 from dhtypes import gameStates, soundTypes
@@ -56,7 +60,7 @@ ongoing_track: soundTypes.Track = soundTypes.Track(
 
 track_start_time: float = 0
 accuracy_score: float = 0.0
-# accuracy_tracker: AccuracyTracker.AccuracyTracker | None = None
+accuracy_tracker: AccuracyTracker.AccuracyTracker | None = None
 
 def drag_drum(drums, active_drum: Drumkit, rel) -> None:
     """Move the held drum by the mouse movement, unless that would overlap another drum."""
@@ -165,14 +169,14 @@ def main() -> None:
             lambda: create_kick(space, drums),
             5,
         ),
-        Button(
-            "graphics/icons/ui/PlayIcon.png",
-            "graphics/icons/ui/PlayIconInverted.png",
-            1210,
-            650,
-            "",
-            start_stick_move,
-        )
+        # Button(
+        #     "graphics/icons/ui/PlayIcon.png",
+        #     "graphics/icons/ui/PlayIconInverted.png",
+        #     1100,
+        #     700,
+        #     "",
+        #     lamba:
+        # )
     ]
     drumstick : pygame.sprite.Group = Create_TransparentSource()
 
@@ -266,6 +270,7 @@ def main() -> None:
                             j.GetRidOf()
             
                 gameState = gameStates.GameState.DRUMMOVE
+                print(accuracy_score)
                 drumstick.empty()
 
                 drumstick = Create_TransparentSource()
