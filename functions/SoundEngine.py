@@ -26,6 +26,9 @@ SCALE_FACTOR: int = 1000 # Adjust this factor to scale the impulse to [0.0, 1.0]
 VOLUME_FLOOR: float = 0.15 # Minimum volume level
 IMPULSE_REJECTION_THRESHOLD: float = 40 # Impulses below this value are ignored
 
+def get_scale_factor() -> int:
+    return SCALE_FACTOR
+
 def get_strength_from_impulse(impulse: float) -> Strength:
     """Get the strength category based on the impulse value."""
     return min(Strength, key=lambda strength: abs(strength.value - impulse))
