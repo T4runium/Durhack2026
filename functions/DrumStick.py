@@ -8,12 +8,14 @@ DrumStick_size = (182,12)
 def Create_DrumStick(Space : pymunk.Space):
     global DrumStick_size
 
-    body = pymunk.Body(2, 100, body_type= pymunk.Body.DYNAMIC )
+    body = pymunk.Body(2, 900, body_type= pymunk.Body.DYNAMIC )
     
     body.position = pygame.mouse.get_pos()
 
     shape = pymunk.Poly.create_box(body , DrumStick_size )
     shape.elasticity = 1
+
+    
     Space.add(body , shape)
 
     return shape

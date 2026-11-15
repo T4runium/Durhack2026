@@ -15,6 +15,7 @@ FPS = 60
 
 space = pymunk.Space()
 space.gravity = (0, 750) # 500 pixels per second squared downward
+space.damping = 1
 
 # ---------- AI bandmate (call and response) ----------
 SoundEngine = neural.SoundEngine
