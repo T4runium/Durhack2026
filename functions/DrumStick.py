@@ -8,7 +8,11 @@ DrumStick_size = (182,12)
 def Create_DrumStick(Space : pymunk.Space):
     global DrumStick_size
 
-    body = pymunk.Body(2, 100, body_type= pymunk.Body.DYNAMIC )
+    body = pymunk.Body(
+        2,
+        pymunk.moment_for_box(2, DrumStick_size) * 0.4,
+        body_type=pymunk.Body.DYNAMIC,
+    )
     
     body.position = pygame.mouse.get_pos()
 
@@ -94,7 +98,7 @@ def Create_TransparentSource():
         
 
 
-
+# when it falls down the edge, you should be able to place the drumstick again
 
     
 
