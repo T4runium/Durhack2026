@@ -3,6 +3,11 @@ from functions.drums import Drumkit, create_all, create_cymbal
 from functions.CollisionHandler import register_collision_handlers
 from functions.DrumStick import CreateDrumStick , Create_TransparentSource
 from classes.button import Button
+<<<<<<< HEAD
+=======
+import levels.Chp1 as Chp1
+import classes.AccuracyTracker as AccuracyTracker
+>>>>>>> 16ef03e0385e5828373d497085cc84e9bd22f6e2
 
 import pymunk.pygame_util
 
@@ -19,7 +24,6 @@ space.gravity = (0, 750) # 500 pixels per second squared downward
 space.damping = 1
 
 gameState: gameStates.GameState = gameStates.GameState.DRUMMOVE
-
 
 background = pygame.image.load('graphics/backgrounds/BG1.png')
 background = pygame.transform.scale(background , SCREEN_SIZE)
@@ -57,11 +61,11 @@ def drag_drum(drums, active_drum: Drumkit, rel) -> None:
 def record_hit(instrument: int, impulse: float) -> None:
     global accuracy_score
 
-    beat = (
-        (pygame.time.get_ticks() / 1000.0 - track_start_time)
-        * ongoing_track.bpm
-        / 60.0
-    )
+    current_time = pygame.time.get_ticks() / 1000.0
+    if current_time < track_start_time:
+        return
+
+    beat = (current_time - track_start_time) * ongoing_track.bpm / 60.0
 
     ongoing_track.sound_events.append(
         (
@@ -157,6 +161,11 @@ def main() -> None:
 
                 elif event.type == pygame.KEYDOWN and event.key in (pygame.K_RETURN, pygame.K_SPACE):
                     active_drum = None
+                    stick_move_start_time = pygame.time.get_ticks() / 1000.0
+                    track_start_time = (
+                        stick_move_start_time
+                        + 4 * 60.0 / ongoing_track.bpm
+                    )
                     gameState = gameStates.GameState.STICKMOVE
 
             elif gameState == gameStates.GameState.STICKMOVE:
@@ -166,7 +175,6 @@ def main() -> None:
 
                     drumstick = CreateDrumStick(space)
                     gameState = gameStates.GameState.STICKDROP
-                    track_start_time = pygame.time.get_ticks() / 1000.0  # Record the start time of the track
 
 
         screen.blit(background , (0,0)) # replace with ui image when ready
@@ -200,6 +208,7 @@ def main() -> None:
             case gameStates.GameState.STICKDROP:
                 
                 sub_steps = 10
+                #print(f"accuracy_score: {accuracy_score:.2f}%")
 
                 for i in range(sub_steps):
                     space.step(1 / FPS / sub_steps)
