@@ -11,7 +11,7 @@ def on_hit(arbiter, space, data):
         return
 
     drum_shape = next(
-        shape for shape in arbiter.shapes if shape.collision_type != 1
+        shape for shape in arbiter.shapes if shape.collision_type != 1 # passes candidate and assigns the first non-drumstick shape to drum_shape
     )
     instrument, label = _SOUND_BY_DRUM_TYPE[drum_shape.collision_type]
 

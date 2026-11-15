@@ -6,3 +6,5 @@ class GameState(Enum):
     DRUMMOVE = 2
     STICKDROP = 3
     STICKMOVE = 4
+    POSTGAME = 5
+    PLAYTRACK = 6

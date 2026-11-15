@@ -1,5 +1,5 @@
 import pygame, pymunk
-from functions.drums import create_drums
+from functions.drums import Drumkit, create_drums
 from functions.CollisionHandler import on_hit as game_on_hit
 from functions.DrumStick import CreateDrumStick , Create_TransparentSource
 from functions.neural import neural
@@ -100,6 +100,7 @@ def main() -> None:
         
     gameState = gameStates.GameState.STICKMOVE
 
+    active_drum: Drumkit | None = None
     running = True
     while running:
 
@@ -115,6 +116,37 @@ def main() -> None:
                 # pygame 2 resizes the window surface itself; calling set_mode here
                 # fights tiling compositors like niri and loops forever
                 screen = pygame.display.get_surface()
+
+            elif event.type == pygame.MOUSEBUTTONDOWN and event.button == 1:
+                active_drum = next( # sets active drum to most recent colliding drum
+                    (
+                        drum
+                        for drum in reversed(drums.sprites())
+                        if drum.rect.collidepoint(event.pos)
+                    ),
+                    None,
+                )
+
+            elif event.type == pygame.MOUSEBUTTONUP and event.button == 1:
+                active_drum = None
+
+            elif event.type == pygame.MOUSEMOTION and active_drum is not None:
+                previous_position = active_drum.body.position
+                active_drum.body.position += event.rel
+                space.reindex_shapes_for_body(active_drum.body)
+
+                overlapping_drum = any(
+                    info.shape is drum.shape
+                    for info in space.shape_query(active_drum.shape)
+                    for drum in drums
+                    if drum is not active_drum
+                )
+                if overlapping_drum:
+                    active_drum.body.position = previous_position
+                    space.reindex_shapes_for_body(active_drum.body)
+                else:
+                    active_drum.rect.center = active_drum.body.position
+
 
         bandmate.update()
 
